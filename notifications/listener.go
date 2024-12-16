@@ -25,6 +25,7 @@ func StartListening(rabbitMQURL string, queueName string) {
 		slog.Error("error creating channel queue: " + err.Error())
 	}
 
+	slog.Info("listening to queue: " + queueName)
 	notifications, err := channel.Consume(queue.Name, "", true, false, false, false, nil)
 	if err != nil {
 		slog.Error("error consuming notifications: " + err.Error())
