@@ -36,9 +36,6 @@ func main() {
 
 	queueName := os.Getenv("QUEUE_NAME")
 	go notifications.StartListening(os.Getenv("RABBITMQ_URL"), queueName)
-	if err != nil {
-		slog.Error("error starting queue listener" + err.Error())
-	}
 
 	bot.AddHandler(events.Ready)
 
