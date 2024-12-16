@@ -1,0 +1,42 @@
+name: integration
+
+on:
+  push:
+    branches: 
+      - "*"
+  pull_request:
+    branches: 
+      - main
+
+env:
+  ENV: testing
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: stable
+    
+    - name: Install Dependencies
+      run: go build
+
+    - name: Run Tests
+      run: go test -coverprofile=coverage.txt
+
+    - name: Lint Project and Check Formatting
+      uses: golangci/golangci-lint-action@v6
+      with:
+        version: latest
+    
+    - name: Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        fail_ci_if_error: true
+        token: ${{ secrets.CODECOV_TOKEN }}
