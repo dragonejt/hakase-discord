@@ -2,37 +2,63 @@ package notifications
 
 import (
 	"log/slog"
+	"os"
+	"strings"
 
-	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/nats-io/nats.go"
 )
 
-func StartListening(rabbitMQURL string, queueName string) {
-	connection, err := amqp.Dial(rabbitMQURL)
+func ListenToStream() {
+	natsURL := os.Getenv("NATS_URL")
+	streamName := os.Getenv("STREAM_NAME")
+	slog.Debug("opening NATS connection to: " + natsURL)
+	connection, err := nats.Connect(natsURL)
 	if err != nil {
-		slog.Error("error starting rabbitMQ connection: " + err.Error())
-		return
+		panic(err.Error())
 	}
-	defer connection.Close()
+	defer connection.Drain()
 
-	channel, err := connection.Channel()
+	slog.Debug("opening jetstream connection")
+	jsctx, err := connection.JetStream()
 	if err != nil {
-		slog.Error("error initializing connection channel: " + err.Error())
+		panic(err)
 	}
-	defer channel.Close()
 
-	queue, err := channel.QueueDeclare(queueName, false, false, false, false, nil)
+	stream, err := jsctx.AddStream(&nats.StreamConfig{
+		Name:     streamName,
+		Subjects: []string{streamName + ".*"},
+	})
 	if err != nil {
-		slog.Error("error creating channel queue: " + err.Error())
+		if !strings.Contains(err.Error(), "stream name already in use") {
+
+			slog.Info("found stream with name: " + stream.Config.Name + ", updating it")
+			_, err = jsctx.UpdateStream(&nats.StreamConfig{
+				Name:     streamName,
+				Subjects: []string{streamName + ".*"},
+			})
+			if err != nil {
+				slog.Error(err.Error())
+				panic(err)
+			}
+		} else {
+			slog.Error(err.Error())
+			panic(err)
+		}
 	}
 
-	slog.Info("listening to queue: " + queueName)
-	notifications, err := channel.Consume(queue.Name, "", true, false, false, false, nil)
+	subscription, err := jsctx.Subscribe(streamName+".notifications", consumeMessage, nats.BindStream(stream.Config.Name))
 	if err != nil {
-		slog.Error("error consuming notifications: " + err.Error())
+		slog.Error(err.Error())
+		panic(err)
 	}
 
-	for n := range notifications {
-		slog.Info("received notification" + string(n.Body))
-	}
+	slog.Info("subscription created to: " + subscription.Subject)
 
+	select {}
+
+}
+
+func consumeMessage(message *nats.Msg) {
+	slog.Info("Received Message: " + string(message.Data))
+	message.Ack()
 }

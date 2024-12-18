@@ -26,6 +26,8 @@ func main() {
 			slog.Warn("error initiating sentry: " + err.Error())
 		}
 
+	} else {
+		slog.SetLogLoggerLevel(slog.LevelDebug)
 	}
 
 	bot, err := discordgo.New("Bot " + os.Getenv("DISCORD_BOT_TOKEN"))
@@ -34,8 +36,7 @@ func main() {
 		return
 	}
 
-	queueName := os.Getenv("QUEUE_NAME")
-	go notifications.StartListening(os.Getenv("RABBITMQ_URL"), queueName)
+	go notifications.ListenToStream()
 
 	bot.AddHandler(events.Ready)
 
