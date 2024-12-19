@@ -1,7 +1,7 @@
 package notifications
 
 import (
-	"errors"
+	"encoding/json"
 	"log/slog"
 	"os"
 	"sync"
@@ -15,13 +15,13 @@ var StreamConnectionPool sync.Pool = sync.Pool{
 
 func createStreamConnection() any {
 	natsURL := os.Getenv("NATS_URL")
-	slog.Debug("opening NATS connection to: " + natsURL)
+	slog.Debug("opening NATS publisher connection to: " + natsURL)
 	connection, err := nats.Connect(natsURL)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	slog.Debug("opening jetstream connection")
+	slog.Debug("opening jetstream publisher connection")
 	jsctx, err := connection.JetStream()
 	if err != nil {
 		panic(err.Error())
@@ -29,16 +29,36 @@ func createStreamConnection() any {
 	return jsctx
 }
 
-func PublishToStream(message string) error {
+func PublishMessage(subject string, message []byte) error {
 	streamName := os.Getenv("STREAM_NAME")
 	jsctx := StreamConnectionPool.Get().(nats.JetStreamContext)
 	defer StreamConnectionPool.Put(jsctx)
 
-	slog.Info("publishing")
-	_, err := jsctx.Publish(streamName+".notifications", []byte(message))
+	slog.Info("publishing to subject: " + streamName + "." + subject)
+	_, err := jsctx.Publish(streamName+"."+subject, message)
 	if err != nil {
-		return errors.New("error publishing to NATS subject: " + err.Error())
+		slog.Error(err.Error())
+		return err
 	}
 
 	return nil
+}
+
+func PublishAssignmentNotification(notification AssignmentNotification) error {
+	message, err := json.Marshal(notification)
+	if err != nil {
+		slog.Error(err.Error())
+		return err
+	}
+	return PublishMessage("assignments", message)
+}
+
+func PublishStudySessionNotification(notification StudySessionNotification) error {
+	message, err := json.Marshal(notification)
+	if err != nil {
+		slog.Error(err.Error())
+		return err
+	}
+
+	return PublishMessage("study_sessions", message)
 }

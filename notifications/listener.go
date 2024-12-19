@@ -11,19 +11,20 @@ import (
 func ListenToStream() {
 	natsURL := os.Getenv("NATS_URL")
 	streamName := os.Getenv("STREAM_NAME")
-	slog.Debug("opening NATS connection to: " + natsURL)
+	slog.Debug("opening NATS consumer connection to: " + natsURL)
 	connection, err := nats.Connect(natsURL)
 	if err != nil {
 		panic(err.Error())
 	}
 	defer connection.Drain()
 
-	slog.Debug("opening jetstream connection")
+	slog.Debug("opening jetstream consumer connection")
 	jsctx, err := connection.JetStream()
 	if err != nil {
 		panic(err)
 	}
 
+	slog.Debug("creating NATS stream")
 	stream, err := jsctx.AddStream(&nats.StreamConfig{
 		Name:     streamName,
 		Subjects: []string{streamName + ".*"},
@@ -60,5 +61,9 @@ func ListenToStream() {
 
 func consumeMessage(message *nats.Msg) {
 	slog.Info("Received Message: " + string(message.Data))
-	message.Ack()
+	err := message.Ack()
+	if err != nil {
+		slog.Error(err.Error())
+		panic(err)
+	}
 }
