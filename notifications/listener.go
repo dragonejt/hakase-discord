@@ -8,7 +8,7 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
-func ListenToStream() {
+func ListenToStream(stopListener chan bool) {
 	natsURL := os.Getenv("NATS_URL")
 	streamName := os.Getenv("STREAM_NAME")
 	slog.Debug("opening NATS consumer connection to: " + natsURL)
@@ -16,7 +16,14 @@ func ListenToStream() {
 	if err != nil {
 		panic(err.Error())
 	}
-	defer connection.Drain()
+	defer func() {
+		slog.Info("draining NATS consumer connection")
+		err := connection.Drain()
+		if err != nil {
+			slog.Error(err.Error())
+			panic(err)
+		}
+	}()
 
 	slog.Debug("opening jetstream consumer connection")
 	jsctx, err := connection.JetStream()
@@ -47,20 +54,26 @@ func ListenToStream() {
 		}
 	}
 
-	subscription, err := jsctx.Subscribe(streamName+".notifications", consumeMessage, nats.BindStream(stream.Config.Name))
+	subscription, err := jsctx.Subscribe(streamName+".notifications", consumeMessage, nats.Durable(streamName+"_notifications"))
 	if err != nil {
 		slog.Error(err.Error())
 		panic(err)
 	}
-
 	slog.Info("subscription created to: " + subscription.Subject)
 
-	select {}
+	assignmentSubscription, err := jsctx.Subscribe(streamName+".assignments", consumeMessage, nats.Durable(streamName+"_assignments"))
+	if err != nil {
+		slog.Error(err.Error())
+		panic(err)
+	}
+	slog.Info("subscription created to: " + assignmentSubscription.Subject)
+
+	<-stopListener
 
 }
 
 func consumeMessage(message *nats.Msg) {
-	slog.Info("Received Message: " + string(message.Data))
+	slog.Info("received message: " + string(message.Data))
 	err := message.Ack()
 	if err != nil {
 		slog.Error(err.Error())

@@ -29,7 +29,7 @@ func createStreamConnection() any {
 	return jsctx
 }
 
-func PublishMessage(subject string, message []byte) error {
+func publishMessage(subject string, message []byte) error {
 	streamName := os.Getenv("STREAM_NAME")
 	jsctx := StreamConnectionPool.Get().(nats.JetStreamContext)
 	defer StreamConnectionPool.Put(jsctx)
@@ -44,21 +44,37 @@ func PublishMessage(subject string, message []byte) error {
 	return nil
 }
 
-func PublishAssignmentNotification(notification AssignmentNotification) error {
-	message, err := json.Marshal(notification)
+func PublishNotification(notification string) {
+	err := publishMessage("notifications", []byte(notification))
 	if err != nil {
 		slog.Error(err.Error())
-		return err
+		panic(err)
 	}
-	return PublishMessage("assignments", message)
 }
 
-func PublishStudySessionNotification(notification StudySessionNotification) error {
+func PublishAssignmentNotification(notification AssignmentNotification) {
 	message, err := json.Marshal(notification)
 	if err != nil {
 		slog.Error(err.Error())
-		return err
+		panic(err)
+	}
+	err = publishMessage("assignments", message)
+	if err != nil {
+		slog.Error(err.Error())
+		panic(err)
+	}
+}
+
+func PublishStudySessionNotification(notification StudySessionNotification) {
+	message, err := json.Marshal(notification)
+	if err != nil {
+		slog.Error(err.Error())
+		panic(err)
 	}
 
-	return PublishMessage("study_sessions", message)
+	err = publishMessage("study_sessions", message)
+	if err != nil {
+		slog.Error(err.Error())
+		panic(err)
+	}
 }

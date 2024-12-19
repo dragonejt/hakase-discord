@@ -36,7 +36,8 @@ func main() {
 		return
 	}
 
-	go notifications.ListenToStream()
+	stopListener := make(chan bool, 1)
+	go notifications.ListenToStream(stopListener)
 
 	bot.AddHandler(events.Ready)
 
@@ -50,4 +51,6 @@ func main() {
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
+
+	stopListener <- true
 }
