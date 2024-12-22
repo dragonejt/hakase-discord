@@ -1,6 +1,7 @@
 package events
 
 import (
+	"fmt"
 	"log/slog"
 
 	"github.com/bwmarrin/discordgo"
@@ -8,6 +9,6 @@ import (
 )
 
 func Ready(session *discordgo.Session, ready *discordgo.Ready) {
-	slog.Info("logged in as " + ready.User.String())
-	notifications.PublishNotification("logged in as " + ready.User.String())
+	slog.Info(fmt.Sprintf("logged in as %s", ready.User.String()))
+	notifications.PublishNotification(fmt.Sprintf("logged in as %s", ready.User.String()))
 }
