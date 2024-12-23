@@ -11,5 +11,10 @@ import (
 func Ready(session *discordgo.Session, ready *discordgo.Ready) {
 	slog.Info(fmt.Sprintf("logged in as %s", ready.User.String()))
 	notifications.PublishNotification(fmt.Sprintf("logged in as %s", ready.User.String()))
-	session.UpdateCustomStatus(fmt.Sprintf("assisting %d classes", len(session.State.Guilds)))
+
+	err := session.UpdateCustomStatus(fmt.Sprintf("assisting %d classes", len(session.State.Guilds)))
+	if err != nil {
+		slog.Error(fmt.Sprintf("failed to update status: %s", err))
+		return
+	}
 }
