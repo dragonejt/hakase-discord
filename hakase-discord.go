@@ -41,6 +41,8 @@ func main() {
 	go notifications.ListenToStream(stopListener)
 
 	bot.AddHandler(events.Ready)
+	bot.AddHandler(events.GuildCreate)
+	bot.AddHandler(events.GuildDelete)
 
 	err = bot.Open()
 	if err != nil {
