@@ -34,7 +34,7 @@ func GuildDelete(session *discordgo.Session, guildDelete *discordgo.GuildDelete)
 		return
 	}
 
-	session.UpdateCustomStatus(fmt.Sprintf("assisting %d classes", len(session.State.Guilds)))
+	err = session.UpdateCustomStatus(fmt.Sprintf("assisting %d classes", len(session.State.Guilds)))
 	if err != nil {
 		slog.Error(fmt.Sprintf("failed to update status: %s", err))
 		return
