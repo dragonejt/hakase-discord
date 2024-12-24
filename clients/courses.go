@@ -48,7 +48,6 @@ func ReadCourse(courseID string) (Course, error) {
 	}
 
 	return course, nil
-
 }
 
 func CreateCourse(course Course) error {
@@ -84,7 +83,6 @@ func CreateCourse(course Course) error {
 	}
 
 	return nil
-
 }
 
 func UpdateCourse(course Course) error {
@@ -139,5 +137,4 @@ func DeleteCourse(courseID string) error {
 	}
 
 	return nil
-
 }
