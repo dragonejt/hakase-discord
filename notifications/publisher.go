@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/dragonejt/hakase-discord/settings"
+	"github.com/getsentry/sentry-go"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
@@ -50,6 +51,7 @@ func publishMessage(subject string, message []byte) error {
 }
 
 func PublishNotification(notification string) {
+	sentry.StartSpan(context.TODO(), "publishNotification")
 	err := publishMessage("notifications", []byte(notification))
 	if err != nil {
 		slog.Error(err.Error())
@@ -58,6 +60,7 @@ func PublishNotification(notification string) {
 }
 
 func PublishAssignmentNotification(notification AssignmentNotification) {
+	sentry.StartSpan(context.TODO(), "publishAssignmentNotification")
 	message, err := json.Marshal(notification)
 	if err != nil {
 		slog.Error(err.Error())
@@ -71,6 +74,7 @@ func PublishAssignmentNotification(notification AssignmentNotification) {
 }
 
 func PublishStudySessionNotification(notification StudySessionNotification) {
+	sentry.StartSpan(context.TODO(), "publishStudySessionNotification")
 	message, err := json.Marshal(notification)
 	if err != nil {
 		slog.Error(err.Error())

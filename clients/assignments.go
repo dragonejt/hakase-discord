@@ -2,6 +2,7 @@ package clients
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"github.com/dragonejt/hakase-discord/settings"
+	"github.com/getsentry/sentry-go"
 )
 
 type Assignment struct {
@@ -21,6 +23,7 @@ type Assignment struct {
 }
 
 func ReadAssignment(assignmentID string) (Assignment, error) {
+	sentry.StartSpan(context.TODO(), "readAssignment")
 	assignment := Assignment{}
 
 	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/assignments?id=%s", settings.BACKEND_URL, assignmentID), nil)
@@ -52,6 +55,7 @@ func ReadAssignment(assignmentID string) (Assignment, error) {
 }
 
 func ListAssignments(courseID string) (Assignment, error) {
+	sentry.StartSpan(context.TODO(), "listAssignments")
 	assignment := Assignment{}
 
 	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/assignments?course_id=%s", settings.BACKEND_URL, courseID), nil)
@@ -83,6 +87,7 @@ func ListAssignments(courseID string) (Assignment, error) {
 }
 
 func CreateAssignment(assignment Assignment) error {
+	sentry.StartSpan(context.TODO(), "createAssignment")
 	jsonBody, err := json.Marshal(assignment)
 	if err != nil {
 		return fmt.Errorf("failed to marshal assignment: %w", err)
@@ -118,6 +123,7 @@ func CreateAssignment(assignment Assignment) error {
 }
 
 func UpdateAssignment(assignment Assignment) error {
+	sentry.StartSpan(context.TODO(), "updateAssignment")
 	jsonBody, err := json.Marshal(assignment)
 	if err != nil {
 		return fmt.Errorf("failed to marshal assignment: %w", err)
@@ -153,6 +159,7 @@ func UpdateAssignment(assignment Assignment) error {
 }
 
 func DeleteAssignment(assignmentID string) error {
+	sentry.StartSpan(context.TODO(), "deleteAssignment")
 	request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/assignments?id=%s", settings.BACKEND_URL, assignmentID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create API request: %w", err)

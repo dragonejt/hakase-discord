@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/dragonejt/hakase-discord/settings"
+	"github.com/getsentry/sentry-go"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
@@ -69,6 +70,7 @@ func ListenToStream(stopListener chan bool) {
 }
 
 func consumeMessage(message jetstream.Msg) {
+	sentry.StartSpan(context.TODO(), "consumeMessage")
 	slog.Info(fmt.Sprintf("received message: %s with subject: %s", string(message.Data()), message.Subject()))
 	err := message.Ack()
 	if err != nil {

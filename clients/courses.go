@@ -2,12 +2,14 @@ package clients
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 
 	"github.com/dragonejt/hakase-discord/settings"
+	"github.com/getsentry/sentry-go"
 )
 
 type Course struct {
@@ -19,7 +21,7 @@ type Course struct {
 }
 
 func ReadCourse(courseID string) (Course, error) {
-
+	sentry.StartSpan(context.TODO(), "readCourse")
 	course := Course{}
 
 	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/courses?course_id=%s", settings.BACKEND_URL, courseID), nil)
@@ -51,6 +53,7 @@ func ReadCourse(courseID string) (Course, error) {
 }
 
 func CreateCourse(course Course) error {
+	sentry.StartSpan(context.TODO(), "createCourse")
 	jsonBody, err := json.Marshal(course)
 	if err != nil {
 		return fmt.Errorf("failed to marshal course: %w", err)
@@ -86,6 +89,7 @@ func CreateCourse(course Course) error {
 }
 
 func UpdateCourse(course Course) error {
+	sentry.StartSpan(context.TODO(), "updateCourse")
 	jsonBody, err := json.Marshal(course)
 	if err != nil {
 		return fmt.Errorf("failed to marshal course: %w", err)
@@ -121,7 +125,7 @@ func UpdateCourse(course Course) error {
 }
 
 func DeleteCourse(courseID string) error {
-
+	sentry.StartSpan(context.TODO(), "deleteCourse")
 	request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/courses?course_id=%s", settings.BACKEND_URL, courseID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create API request: %w", err)
