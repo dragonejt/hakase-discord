@@ -19,13 +19,11 @@ func GuildCreate(session *discordgo.Session, guildCreate *discordgo.GuildCreate)
 	err := clients.CreateCourse(course)
 	if err != nil {
 		slog.Error(fmt.Sprintf("failed to create course: %s", err))
-		return
 	}
 
 	err = session.UpdateCustomStatus(fmt.Sprintf("assisting %d classes", len(session.State.Guilds)))
 	if err != nil {
 		slog.Error(fmt.Sprintf("failed to update status: %s", err))
-		return
 	}
 }
 
@@ -35,12 +33,10 @@ func GuildDelete(session *discordgo.Session, guildDelete *discordgo.GuildDelete)
 	err := clients.DeleteCourse(guildDelete.Guild.ID)
 	if err != nil {
 		slog.Error(fmt.Sprintf("failed to delete course: %s", err))
-		return
 	}
 
 	err = session.UpdateCustomStatus(fmt.Sprintf("assisting %d classes", len(session.State.Guilds)))
 	if err != nil {
 		slog.Error(fmt.Sprintf("failed to update status: %s", err))
-		return
 	}
 }
