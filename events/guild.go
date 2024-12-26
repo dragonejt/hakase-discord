@@ -10,7 +10,7 @@ import (
 	"github.com/getsentry/sentry-go"
 )
 
-func GuildCreate(session *discordgo.Session, guildCreate *discordgo.GuildCreate) {
+func GuildCreate(bot *discordgo.Session, guildCreate *discordgo.GuildCreate) {
 	sentry.StartTransaction(context.TODO(), "guildCreate")
 	slog.Info(fmt.Sprintf("added to guild: %s (%s)", guildCreate.Guild.Name, guildCreate.Guild.ID))
 	course := clients.Course{
@@ -21,13 +21,13 @@ func GuildCreate(session *discordgo.Session, guildCreate *discordgo.GuildCreate)
 		slog.Error(fmt.Sprintf("failed to create course: %s", err))
 	}
 
-	err = session.UpdateCustomStatus(fmt.Sprintf("assisting %d classes", len(session.State.Guilds)))
+	err = bot.UpdateCustomStatus(fmt.Sprintf("assisting %d classes", len(bot.State.Guilds)))
 	if err != nil {
 		slog.Error(fmt.Sprintf("failed to update status: %s", err))
 	}
 }
 
-func GuildDelete(session *discordgo.Session, guildDelete *discordgo.GuildDelete) {
+func GuildDelete(bot *discordgo.Session, guildDelete *discordgo.GuildDelete) {
 	sentry.StartTransaction(context.TODO(), "guildDelete")
 	slog.Info(fmt.Sprintf("removed from guild: %s (%s)", guildDelete.Guild.Name, guildDelete.Guild.ID))
 	err := clients.DeleteCourse(guildDelete.Guild.ID)
@@ -35,7 +35,7 @@ func GuildDelete(session *discordgo.Session, guildDelete *discordgo.GuildDelete)
 		slog.Error(fmt.Sprintf("failed to delete course: %s", err))
 	}
 
-	err = session.UpdateCustomStatus(fmt.Sprintf("assisting %d classes", len(session.State.Guilds)))
+	err = bot.UpdateCustomStatus(fmt.Sprintf("assisting %d classes", len(bot.State.Guilds)))
 	if err != nil {
 		slog.Error(fmt.Sprintf("failed to update status: %s", err))
 	}

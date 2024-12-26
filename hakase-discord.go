@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/dragonejt/hakase-discord/commands"
 	"github.com/dragonejt/hakase-discord/events"
 	"github.com/dragonejt/hakase-discord/notifications"
 	"github.com/dragonejt/hakase-discord/settings"
@@ -38,13 +39,27 @@ func main() {
 		slog.Error(fmt.Sprintf("error creating discord session: %s", err.Error()))
 		return
 	}
+	bot.StateEnabled = true
 
 	stopListener := make(chan bool, 1)
 	go notifications.ListenToStream(stopListener)
 
+	slog.Info("registering event handlers")
 	bot.AddHandler(events.Ready)
 	bot.AddHandler(events.GuildCreate)
 	bot.AddHandler(events.GuildDelete)
+	bot.AddHandler(events.InteractionCreate)
+
+	slog.Info("registering commands")
+	commands := []*discordgo.ApplicationCommand{commands.AssignmentsCommand}
+	for _, cmd := range commands {
+		_, err = bot.ApplicationCommandCreate(settings.DISCORD_APP_ID, "", cmd)
+		if err != nil {
+			slog.Error(fmt.Sprintf("error registering command: %s, %s", cmd.Name, err.Error()))
+		} else {
+			slog.Info(fmt.Sprintf("successfully registered command: %s", cmd.Name))
+		}
+	}
 
 	err = bot.Open()
 	if err != nil {
