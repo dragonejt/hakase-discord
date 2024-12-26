@@ -23,9 +23,13 @@ var AssignmentsCommand *discordgo.ApplicationCommand = &discordgo.ApplicationCom
 }
 
 func SlashAssignments(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-	bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+	err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseDeferredMessageUpdate,
 	})
+	if err != nil {
+		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		return
+	}
 
 	optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(interactionCreate.ApplicationCommandData().Options))
 	for _, opt := range interactionCreate.ApplicationCommandData().Options {
@@ -41,24 +45,30 @@ func SlashAssignments(bot *discordgo.Session, interactionCreate *discordgo.Inter
 	} else {
 		assignments, err := clients.ListAssignments(interactionCreate.GuildID)
 		if err != nil {
-			bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+			err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: err.Error(),
 				},
 			})
+			if err != nil {
+				slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			}
 		} else {
 			body, err := json.Marshal(assignments)
 			if err != nil {
 				slog.Error(err.Error())
 				return
 			}
-			bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+			err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: string(body),
 				},
 			})
+			if err != nil {
+				slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			}
 		}
 	}
 
