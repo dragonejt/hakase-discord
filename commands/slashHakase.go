@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"fmt"
+	"log/slog"
 	"math/rand"
 
 	"github.com/bwmarrin/discordgo"
@@ -46,20 +48,26 @@ func SlashHakase(bot *discordgo.Session, interactionCreate *discordgo.Interactio
 
 	subcommand, exists := optionMap["subcommand"]
 	if !exists {
-		bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
 				Content: "hakase pong!",
 			},
 		})
+		if err != nil {
+			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		}
 	} else {
 		if subcommand.StringValue() == "rock-paper-scissors" {
-			bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+			err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: rockPaperScissorsGIFS[rand.Intn(len(rockPaperScissorsGIFS))],
 				},
 			})
+			if err != nil {
+				slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			}
 		}
 	}
 }
