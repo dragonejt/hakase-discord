@@ -44,6 +44,13 @@ func main() {
 	stopListener := make(chan bool, 1)
 	go notifications.ListenToStream(stopListener)
 
+	err = bot.Open()
+	if err != nil {
+		slog.Error(fmt.Sprintf("error opening connection to discord: %s", err.Error()))
+		return
+	}
+	defer bot.Close()
+
 	slog.Info("registering event handlers")
 	bot.AddHandler(events.Ready)
 	bot.AddHandler(events.GuildCreate)
@@ -53,20 +60,13 @@ func main() {
 	slog.Info("registering commands")
 	commands := []*discordgo.ApplicationCommand{commands.AssignmentsCommand}
 	for _, cmd := range commands {
-		_, err = bot.ApplicationCommandCreate(settings.DISCORD_APP_ID, "", cmd)
+		_, err = bot.ApplicationCommandCreate(bot.State.User.ID, "", cmd)
 		if err != nil {
 			slog.Error(fmt.Sprintf("error registering command: %s, %s", cmd.Name, err.Error()))
 		} else {
 			slog.Info(fmt.Sprintf("successfully registered command: %s", cmd.Name))
 		}
 	}
-
-	err = bot.Open()
-	if err != nil {
-		slog.Error(fmt.Sprintf("error opening connection to discord: %s", err.Error()))
-		return
-	}
-	defer bot.Close()
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
