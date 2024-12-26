@@ -9,7 +9,7 @@ import (
 	"github.com/dragonejt/hakase-discord/clients"
 )
 
-var AssignmentsCommand *discordgo.ApplicationCommand = &discordgo.ApplicationCommand{
+var AssignmentsCommand = discordgo.ApplicationCommand{
 	Name:        "assignments",
 	Description: "configure assignments for due date notifications",
 	Type:        discordgo.ChatApplicationCommand,

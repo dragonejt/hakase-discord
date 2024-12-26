@@ -58,7 +58,7 @@ func main() {
 	bot.AddHandler(events.InteractionCreate)
 
 	slog.Info("registering commands")
-	commands := []*discordgo.ApplicationCommand{commands.AssignmentsCommand}
+	commands := []*discordgo.ApplicationCommand{&commands.AssignmentsCommand, &commands.HakaseCommand}
 	for _, cmd := range commands {
 		_, err = bot.ApplicationCommandCreate(bot.State.User.ID, "", cmd)
 		if err != nil {
