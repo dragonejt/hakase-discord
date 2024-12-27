@@ -36,7 +36,7 @@ func SlashAssignments(bot *discordgo.Session, interactionCreate *discordgo.Inter
 		optionMap[opt.Name] = opt
 	}
 
-	slog.Info(fmt.Sprintf("/assignments %s", fmt.Sprint(optionMap)))
+	slog.Info(fmt.Sprintf("/assignments executed by %s (%s)", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID))
 
 	assignmentID, exists := optionMap["id"]
 	if exists {
@@ -51,11 +51,9 @@ func SlashAssignments(bot *discordgo.Session, interactionCreate *discordgo.Inter
 func listAssignments(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 	assignments, err := clients.ListAssignments(interactionCreate.GuildID)
 	if err != nil {
-		err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: err.Error(),
-			},
+		errMsg := err.Error()
+		_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
+			Content: &errMsg,
 		})
 		if err != nil {
 			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
@@ -66,11 +64,9 @@ func listAssignments(bot *discordgo.Session, interactionCreate *discordgo.Intera
 			slog.Error(err.Error())
 			return
 		}
-		err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: string(body),
-			},
+		stringBody := string(body)
+		_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
+			Content: &stringBody,
 		})
 		if err != nil {
 			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))

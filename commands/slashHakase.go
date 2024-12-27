@@ -48,6 +48,8 @@ func SlashHakase(bot *discordgo.Session, interactionCreate *discordgo.Interactio
 		optionMap[opt.Name] = opt
 	}
 
+	slog.Info(fmt.Sprintf("/hakase executed by %s (%s)", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID))
+
 	subcommand, exists := optionMap["cmd"]
 	if !exists {
 		ping(bot, interactionCreate)
@@ -60,6 +62,7 @@ func SlashHakase(bot *discordgo.Session, interactionCreate *discordgo.Interactio
 }
 
 func ping(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+	start := time.Now()
 	err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 	})
@@ -71,11 +74,9 @@ func ping(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate
 		slog.Error(fmt.Sprintf("error pinging backend: %s", err.Error()))
 	}
 
-	err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("hakase pong! response time: %dms", time.Since(interactionCreate.Message.Timestamp)),
-		},
+	pong := fmt.Sprintf("hakase pong! response time: %dms", time.Since(start).Milliseconds())
+	_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
+		Content: &pong,
 	})
 	if err != nil {
 		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
