@@ -43,33 +43,37 @@ func SlashAssignments(bot *discordgo.Session, interactionCreate *discordgo.Inter
 		slog.Info(assignmentID.StringValue())
 
 	} else {
-		assignments, err := clients.ListAssignments(interactionCreate.GuildID)
-		if err != nil {
-			err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: err.Error(),
-				},
-			})
-			if err != nil {
-				slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
-			}
-		} else {
-			body, err := json.Marshal(assignments)
-			if err != nil {
-				slog.Error(err.Error())
-				return
-			}
-			err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: string(body),
-				},
-			})
-			if err != nil {
-				slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
-			}
-		}
+		listAssignments(bot, interactionCreate)
 	}
 
+}
+
+func listAssignments(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+	assignments, err := clients.ListAssignments(interactionCreate.GuildID)
+	if err != nil {
+		err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: err.Error(),
+			},
+		})
+		if err != nil {
+			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		}
+	} else {
+		body, err := json.Marshal(assignments)
+		if err != nil {
+			slog.Error(err.Error())
+			return
+		}
+		err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: string(body),
+			},
+		})
+		if err != nil {
+			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		}
+	}
 }

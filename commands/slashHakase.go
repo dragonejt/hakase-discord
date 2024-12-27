@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"log/slog"
 	"math/rand"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/dragonejt/hakase-discord/clients"
 )
 
 var HakaseCommand = discordgo.ApplicationCommand{
@@ -48,26 +50,40 @@ func SlashHakase(bot *discordgo.Session, interactionCreate *discordgo.Interactio
 
 	subcommand, exists := optionMap["cmd"]
 	if !exists {
-		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: "hakase pong!",
-			},
-		})
-		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
-		}
+		ping(bot, interactionCreate)
 	} else {
-		if subcommand.StringValue() == "rock-paper-scissors" {
-			err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: rockPaperScissorsGIFS[rand.Intn(len(rockPaperScissorsGIFS))],
-				},
-			})
-			if err != nil {
-				slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
-			}
+		switch subcommand.StringValue() {
+		case "rock-paper-scissors":
+			rockPaperScissors(bot, interactionCreate)
 		}
+	}
+}
+
+func ping(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+	_, err := clients.ReadCourse(interactionCreate.GuildID)
+	if err != nil {
+		slog.Error(fmt.Sprintf("error pinging backend: %s", err.Error()))
+	}
+	err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: fmt.Sprintf("hakase pong! response time: %dms", time.Since(interactionCreate.Message.Timestamp)),
+		},
+	})
+	if err != nil {
+		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+	}
+
+}
+
+func rockPaperScissors(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+	err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: rockPaperScissorsGIFS[rand.Intn(len(rockPaperScissorsGIFS))],
+		},
+	})
+	if err != nil {
+		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
 	}
 }
