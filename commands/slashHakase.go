@@ -46,7 +46,7 @@ func SlashHakase(bot *discordgo.Session, interactionCreate *discordgo.Interactio
 		optionMap[opt.Name] = opt
 	}
 
-	subcommand, exists := optionMap["subcommand"]
+	subcommand, exists := optionMap["cmd"]
 	if !exists {
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
