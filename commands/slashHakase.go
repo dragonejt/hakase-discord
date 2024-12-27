@@ -60,10 +60,17 @@ func SlashHakase(bot *discordgo.Session, interactionCreate *discordgo.Interactio
 }
 
 func ping(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-	_, err := clients.ReadCourse(interactionCreate.GuildID)
+	err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+	})
+	if err != nil {
+		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+	}
+	_, err = clients.ReadCourse(interactionCreate.GuildID)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error pinging backend: %s", err.Error()))
 	}
+
 	err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{

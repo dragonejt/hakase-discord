@@ -24,7 +24,7 @@ var AssignmentsCommand = discordgo.ApplicationCommand{
 
 func SlashAssignments(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 	err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseDeferredMessageUpdate,
+		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 	})
 	if err != nil {
 		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
