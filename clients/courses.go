@@ -13,11 +13,11 @@ import (
 )
 
 type Course struct {
-	Id             int    `json:"id,omitempty"`
-	Platform       int    `json:"platform,omitempty"`
-	Course_id      string `json:"course_id"`
-	Notify_channel string `json:"notify_channel,omitempty"`
-	Notify_role    string `json:"notify_role,omitempty"`
+	ID            int    `json:"id,omitempty"`
+	Platform      int    `json:"platform,omitempty"`
+	CourseID      string `json:"course_id"`
+	NotifyChannel string `json:"notify_channel,omitempty"`
+	NotifyRole    string `json:"notify_role,omitempty"`
 }
 
 func ReadCourse(courseID string) (Course, error) {

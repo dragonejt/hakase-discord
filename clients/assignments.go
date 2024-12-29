@@ -14,12 +14,12 @@ import (
 )
 
 type Assignment struct {
-	Id        int       `json:"id,omitempty"`
-	Course    int       `json:"course,omitempty"`
-	Course_id string    `json:"course_id,omitempty"`
-	Name      string    `json:"name"`
-	Due       time.Time `json:"due"`
-	Link      string    `json:"link,omitempty"`
+	ID       int       `json:"id,omitempty"`
+	Course   int       `json:"course,omitempty"`
+	CourseID string    `json:"course_id,omitempty"`
+	Name     string    `json:"name"`
+	Due      time.Time `json:"due"`
+	Link     string    `json:"link,omitempty"`
 }
 
 func ReadAssignment(assignmentID string) (Assignment, error) {

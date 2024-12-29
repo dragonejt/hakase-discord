@@ -1,12 +1,12 @@
 package commands
 
 import (
-	"encoding/json"
 	"fmt"
 	"log/slog"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/dragonejt/hakase-discord/clients"
+	"github.com/dragonejt/hakase-discord/views"
 )
 
 var AssignmentsCommand = discordgo.ApplicationCommand{
@@ -59,14 +59,9 @@ func listAssignments(bot *discordgo.Session, interactionCreate *discordgo.Intera
 			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
 		}
 	} else {
-		body, err := json.Marshal(assignments)
-		if err != nil {
-			slog.Error(err.Error())
-			return
-		}
-		stringBody := string(body)
 		_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
-			Content: &stringBody,
+			Embeds:     &[]*discordgo.MessageEmbed{views.AssignmentsListView(interactionCreate, assignments)},
+			Components: &[]discordgo.MessageComponent{views.AssignmentsListActions(interactionCreate, assignments)},
 		})
 		if err != nil {
 			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))

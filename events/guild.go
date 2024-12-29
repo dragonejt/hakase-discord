@@ -14,7 +14,7 @@ func GuildCreate(bot *discordgo.Session, guildCreate *discordgo.GuildCreate) {
 	sentry.StartTransaction(context.TODO(), "guildCreate")
 	slog.Info(fmt.Sprintf("added to guild: %s (%s)", guildCreate.Guild.Name, guildCreate.Guild.ID))
 	course := clients.Course{
-		Course_id: guildCreate.Guild.ID,
+		CourseID: guildCreate.Guild.ID,
 	}
 	err := clients.CreateCourse(course)
 	if err != nil {
