@@ -86,16 +86,16 @@ func ListAssignments(courseID string) ([]Assignment, error) {
 	return assignments, nil
 }
 
-func CreateAssignment(assignment Assignment) error {
+func CreateAssignment(assignment Assignment) (Assignment, error) {
 	sentry.StartSpan(context.TODO(), "createAssignment")
 	jsonBody, err := json.Marshal(assignment)
 	if err != nil {
-		return fmt.Errorf("failed to marshal assignment: %w", err)
+		return Assignment{}, fmt.Errorf("failed to marshal assignment: %w", err)
 	}
 
 	request, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/assignments", settings.BACKEND_URL), bytes.NewReader(jsonBody))
 	if err != nil {
-		return fmt.Errorf("failed to create API request: %w", err)
+		return Assignment{}, fmt.Errorf("failed to create API request: %w", err)
 	}
 	request.Header.Add("Accept", "application/json")
 	request.Header.Add("Content-Type", "application/json")
@@ -103,35 +103,35 @@ func CreateAssignment(assignment Assignment) error {
 
 	response, err := http.DefaultClient.Do(request)
 	if err != nil {
-		return fmt.Errorf("failed to execute API request: %w", err)
+		return Assignment{}, fmt.Errorf("failed to execute API request: %w", err)
 	}
 	if response.StatusCode != http.StatusCreated {
-		return fmt.Errorf("failed status code API response: %d", response.StatusCode)
+		return Assignment{}, fmt.Errorf("failed status code API response: %d", response.StatusCode)
 	}
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return fmt.Errorf("failed reading API response body: %d", response.StatusCode)
+		return Assignment{}, fmt.Errorf("failed reading API response body: %d", response.StatusCode)
 	}
 
 	err = json.Unmarshal(body, &assignment)
 	if err != nil {
-		return fmt.Errorf("failed to unmarshal API response: %s", string(body))
+		return Assignment{}, fmt.Errorf("failed to unmarshal API response: %s", string(body))
 	}
 
-	return nil
+	return assignment, nil
 }
 
-func UpdateAssignment(assignment Assignment) error {
+func UpdateAssignment(assignment Assignment) (Assignment, error) {
 	sentry.StartSpan(context.TODO(), "updateAssignment")
 	jsonBody, err := json.Marshal(assignment)
 	if err != nil {
-		return fmt.Errorf("failed to marshal assignment: %w", err)
+		return Assignment{}, fmt.Errorf("failed to marshal assignment: %w", err)
 	}
 
 	request, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/assignments", settings.BACKEND_URL), bytes.NewReader(jsonBody))
 	if err != nil {
-		return fmt.Errorf("failed to create API request: %w", err)
+		return Assignment{}, fmt.Errorf("failed to create API request: %w", err)
 	}
 	request.Header.Add("Accept", "application/json")
 	request.Header.Add("Content-Type", "application/json")
@@ -139,23 +139,23 @@ func UpdateAssignment(assignment Assignment) error {
 
 	response, err := http.DefaultClient.Do(request)
 	if err != nil {
-		return fmt.Errorf("failed to execute API request: %w", err)
+		return Assignment{}, fmt.Errorf("failed to execute API request: %w", err)
 	}
 	if response.StatusCode != http.StatusAccepted {
-		return fmt.Errorf("failed status code API response: %d", response.StatusCode)
+		return Assignment{}, fmt.Errorf("failed status code API response: %d", response.StatusCode)
 	}
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return fmt.Errorf("failed reading API response body: %d", response.StatusCode)
+		return Assignment{}, fmt.Errorf("failed reading API response body: %d", response.StatusCode)
 	}
 
 	err = json.Unmarshal(body, &assignment)
 	if err != nil {
-		return fmt.Errorf("failed to unmarshal API response: %s", string(body))
+		return Assignment{}, fmt.Errorf("failed to unmarshal API response: %s", string(body))
 	}
 
-	return nil
+	return assignment, nil
 }
 
 func DeleteAssignment(assignmentID string) error {

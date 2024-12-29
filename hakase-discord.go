@@ -9,8 +9,8 @@ import (
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/dragonejt/hakase-discord/commands"
 	"github.com/dragonejt/hakase-discord/events"
+	"github.com/dragonejt/hakase-discord/interactions"
 	"github.com/dragonejt/hakase-discord/notifications"
 	"github.com/dragonejt/hakase-discord/settings"
 	"github.com/getsentry/sentry-go"
@@ -57,9 +57,9 @@ func main() {
 	bot.AddHandler(events.GuildDelete)
 	bot.AddHandler(events.InteractionCreate)
 
-	slog.Info("registering commands")
-	commands := []*discordgo.ApplicationCommand{&commands.AssignmentsCommand, &commands.HakaseCommand}
-	for _, cmd := range commands {
+	slog.Info("registering interactions")
+	interactions := []*discordgo.ApplicationCommand{&interactions.AssignmentsCommand, &interactions.HakaseCommand}
+	for _, cmd := range interactions {
 		_, err = bot.ApplicationCommandCreate(bot.State.User.ID, "", cmd)
 		if err != nil {
 			slog.Error(fmt.Sprintf("error registering command: %s, %s", cmd.Name, err.Error()))

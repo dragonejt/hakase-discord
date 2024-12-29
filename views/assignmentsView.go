@@ -41,13 +41,54 @@ func AssignmentsListView(interactionCreate *discordgo.InteractionCreate, assignm
 func AssignmentsListActions(interactionCreate *discordgo.InteractionCreate, assignments []clients.Assignment) *discordgo.ActionsRow {
 	addAssignmentButton := discordgo.Button{
 		Emoji: &discordgo.ComponentEmoji{
-			Name: "📝",
+			Name: "➕",
 		},
 		Label:    "add assignment",
 		Style:    discordgo.PrimaryButton,
-		CustomID: "addAssignment",
+		CustomID: "addAssignmentAction",
 	}
 
 	return &discordgo.ActionsRow{Components: []discordgo.MessageComponent{addAssignmentButton}}
 
+}
+
+func AssignmentModal() []discordgo.MessageComponent {
+	return []discordgo.MessageComponent{
+		discordgo.ActionsRow{
+			Components: []discordgo.MessageComponent{
+				discordgo.TextInput{
+					CustomID:    "assignmentName",
+					Label:       "assignment name:",
+					Style:       discordgo.TextInputShort,
+					Placeholder: "Assignment 1",
+					Required:    true,
+					MaxLength:   50,
+				},
+			},
+		},
+		discordgo.ActionsRow{
+			Components: []discordgo.MessageComponent{
+				discordgo.TextInput{
+					CustomID:    "assignmentDue",
+					Label:       "due date:",
+					Style:       discordgo.TextInputShort,
+					Placeholder: time.Now().Format(time.RFC1123),
+					Required:    true,
+					MaxLength:   50,
+				},
+			},
+		},
+		discordgo.ActionsRow{
+			Components: []discordgo.MessageComponent{
+				discordgo.TextInput{
+					CustomID:    "assignmentLink",
+					Label:       "link:",
+					Style:       discordgo.TextInputShort,
+					Placeholder: "https://canvas.instructure.com",
+					Required:    false,
+					MaxLength:   50,
+				},
+			},
+		},
+	}
 }
