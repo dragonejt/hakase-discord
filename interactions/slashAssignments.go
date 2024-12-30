@@ -40,7 +40,7 @@ func SlashAssignments(bot *discordgo.Session, interactionCreate *discordgo.Inter
 
 	assignmentID, exists := optionMap["id"]
 	if exists {
-		slog.Info(assignmentID.StringValue())
+		getAssignment(bot, interactionCreate, fmt.Sprint(assignmentID.IntValue()))
 
 	} else {
 		listAssignments(bot, interactionCreate)
@@ -48,8 +48,31 @@ func SlashAssignments(bot *discordgo.Session, interactionCreate *discordgo.Inter
 
 }
 
+func getAssignment(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate, assignmentID string) {
+	assignment, err := clients.ReadAssignment(assignmentID)
+
+	if err != nil {
+		errMsg := err.Error()
+		_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
+			Content: &errMsg,
+		})
+		if err != nil {
+			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		}
+	} else {
+		_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
+			Embeds:     &[]*discordgo.MessageEmbed{views.AssignmentView(interactionCreate, assignment)},
+			Components: &[]discordgo.MessageComponent{views.AssignmentActions(interactionCreate)},
+		})
+		if err != nil {
+			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		}
+	}
+}
+
 func listAssignments(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 	assignments, err := clients.ListAssignments(interactionCreate.GuildID)
+
 	if err != nil {
 		errMsg := err.Error()
 		_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
@@ -61,7 +84,7 @@ func listAssignments(bot *discordgo.Session, interactionCreate *discordgo.Intera
 	} else {
 		_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
 			Embeds:     &[]*discordgo.MessageEmbed{views.AssignmentsListView(interactionCreate, assignments)},
-			Components: &[]discordgo.MessageComponent{views.AssignmentsListActions(interactionCreate, assignments)},
+			Components: &[]discordgo.MessageComponent{views.AssignmentsListActions(interactionCreate)},
 		})
 		if err != nil {
 			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))

@@ -13,7 +13,6 @@ func AssignmentsListView(interactionCreate *discordgo.InteractionCreate, assignm
 		Title:       "assignments",
 		Description: fmt.Sprintf("%d assignments in course", len(assignments)),
 		Author:      &discordgo.MessageEmbedAuthor{Name: interactionCreate.Member.User.Username, IconURL: interactionCreate.Member.User.AvatarURL("")},
-		Color:       0x00ff00,
 	}
 
 	for _, assignment := range assignments {
@@ -38,18 +37,53 @@ func AssignmentsListView(interactionCreate *discordgo.InteractionCreate, assignm
 
 }
 
-func AssignmentsListActions(interactionCreate *discordgo.InteractionCreate, assignments []clients.Assignment) *discordgo.ActionsRow {
-	addAssignmentButton := discordgo.Button{
-		Emoji: &discordgo.ComponentEmoji{
-			Name: "➕",
+func AssignmentsListActions(interactionCreate *discordgo.InteractionCreate) *discordgo.ActionsRow {
+	return &discordgo.ActionsRow{
+		Components: []discordgo.MessageComponent{
+			discordgo.Button{
+				Emoji: &discordgo.ComponentEmoji{
+					Name: "➕",
+				},
+				Label:    "create",
+				Style:    discordgo.PrimaryButton,
+				CustomID: "addAssignmentAction",
+			},
 		},
-		Label:    "add assignment",
-		Style:    discordgo.PrimaryButton,
-		CustomID: "addAssignmentAction",
 	}
 
-	return &discordgo.ActionsRow{Components: []discordgo.MessageComponent{addAssignmentButton}}
+}
 
+func AssignmentView(interactionCreate *discordgo.InteractionCreate, assignment clients.Assignment) *discordgo.MessageEmbed {
+	return &discordgo.MessageEmbed{
+		Title:       assignment.Name,
+		Description: fmt.Sprintf("due %s", assignment.Due.Format(time.RFC1123)),
+		Author:      &discordgo.MessageEmbedAuthor{Name: interactionCreate.Member.User.Username, IconURL: interactionCreate.Member.User.AvatarURL("")},
+		URL:         assignment.Link,
+		Footer:      &discordgo.MessageEmbedFooter{Text: fmt.Sprintf("id %d", assignment.ID)},
+	}
+}
+
+func AssignmentActions(interactionCreate *discordgo.InteractionCreate) *discordgo.ActionsRow {
+	return &discordgo.ActionsRow{
+		Components: []discordgo.MessageComponent{
+			discordgo.Button{
+				Emoji: &discordgo.ComponentEmoji{
+					Name: "📝",
+				},
+				Label:    "update",
+				Style:    discordgo.PrimaryButton,
+				CustomID: "updateAssignmentAction",
+			},
+			discordgo.Button{
+				Emoji: &discordgo.ComponentEmoji{
+					Name: "🗑️",
+				},
+				Label:    "delete",
+				Style:    discordgo.SecondaryButton,
+				CustomID: "deleteAssignmentAction",
+			},
+		},
+	}
 }
 
 func AssignmentModal() []discordgo.MessageComponent {
