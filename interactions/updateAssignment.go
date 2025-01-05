@@ -13,7 +13,7 @@ import (
 )
 
 func UpdateAssignment(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-	slog.Debug(fmt.Sprintf("updateAssignment executed by %s (%s)", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID))
+	slog.Debug(fmt.Sprintf("updateAssignment executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
 	if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -57,7 +57,7 @@ func UpdateAssignment(bot *discordgo.Session, interactionCreate *discordgo.Inter
 }
 
 func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-	slog.Info(fmt.Sprintf("updateAssignmentSubmit executed by %s (%s)", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID))
+	slog.Info(fmt.Sprintf("updateAssignmentSubmit executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
 	err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseDeferredMessageUpdate,
 	})
@@ -124,6 +124,36 @@ func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo
 		Content:    "assignment updated!",
 		Embeds:     []*discordgo.MessageEmbed{views.AssignmentView(interactionCreate, updatedAssignment)},
 		Components: []discordgo.MessageComponent{views.AssignmentActions(interactionCreate, updatedAssignment)},
+	})
+	if err != nil {
+		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+	}
+}
+
+func DeleteAssignment(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+	slog.Debug(fmt.Sprintf("deleteAssignment executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
+	assignmentID := strings.Split(interactionCreate.MessageComponentData().CustomID, "_")[1]
+	err := clients.DeleteAssignment(assignmentID)
+	if err != nil {
+		slog.Error(fmt.Sprintf("unable to delete assignment %s: %s", assignmentID, err.Error()))
+		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: fmt.Sprintf("unable to delete assignment %s: %s", assignmentID, err.Error()),
+				Flags:   discordgo.MessageFlagsEphemeral,
+			},
+		})
+		if err != nil {
+			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		}
+		return
+	}
+
+	err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: fmt.Sprintf("assignment %s deleted!", assignmentID),
+		},
 	})
 	if err != nil {
 		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))

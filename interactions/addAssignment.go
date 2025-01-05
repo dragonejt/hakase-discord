@@ -13,7 +13,7 @@ import (
 )
 
 func AddAssignment(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-	slog.Debug(fmt.Sprintf("addAssignment executed by %s (%s)", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID))
+	slog.Debug(fmt.Sprintf("addAssignment executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
 	if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -43,7 +43,7 @@ func AddAssignment(bot *discordgo.Session, interactionCreate *discordgo.Interact
 }
 
 func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-	slog.Info(fmt.Sprintf("addAssignmentSubmit executed by %s (%s)", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID))
+	slog.Info(fmt.Sprintf("addAssignmentSubmit executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
 	err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseDeferredMessageUpdate,
 	})

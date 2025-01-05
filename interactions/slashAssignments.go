@@ -36,7 +36,7 @@ func SlashAssignments(bot *discordgo.Session, interactionCreate *discordgo.Inter
 		optionMap[opt.Name] = opt
 	}
 
-	slog.Info(fmt.Sprintf("/assignments executed by %s (%s)", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID))
+	slog.Info(fmt.Sprintf("/assignments executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
 
 	assignmentID, exists := optionMap["id"]
 	if exists {

@@ -48,7 +48,7 @@ func SlashHakase(bot *discordgo.Session, interactionCreate *discordgo.Interactio
 		optionMap[opt.Name] = opt
 	}
 
-	slog.Info(fmt.Sprintf("/hakase executed by %s (%s)", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID))
+	slog.Info(fmt.Sprintf("/hakase executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
 
 	subcommand, exists := optionMap["cmd"]
 	if !exists {

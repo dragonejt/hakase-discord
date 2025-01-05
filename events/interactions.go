@@ -26,8 +26,10 @@ func InteractionCreate(bot *discordgo.Session, interactionCreate *discordgo.Inte
 			interactions.AddAssignment(bot, interactionCreate)
 		} else if strings.HasPrefix(customID, "updateAssignmentAction") {
 			interactions.UpdateAssignment(bot, interactionCreate)
+		} else if strings.HasPrefix(customID, "deleteAssignmentAction") {
+			interactions.DeleteAssignment(bot, interactionCreate)
 		} else {
-			slog.Error(fmt.Sprintf("unknown message component: %s", customID))
+			slog.Error(fmt.Sprintf("unknown message component action: %s", customID))
 		}
 	case discordgo.InteractionModalSubmit:
 		customID := interactionCreate.ModalSubmitData().CustomID
