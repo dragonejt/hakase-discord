@@ -62,7 +62,7 @@ func getAssignment(bot *discordgo.Session, interactionCreate *discordgo.Interact
 	} else {
 		_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
 			Embeds:     &[]*discordgo.MessageEmbed{views.AssignmentView(interactionCreate, assignment)},
-			Components: &[]discordgo.MessageComponent{views.AssignmentActions(interactionCreate)},
+			Components: &[]discordgo.MessageComponent{views.AssignmentActions(interactionCreate, assignment)},
 		})
 		if err != nil {
 			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))

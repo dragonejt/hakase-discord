@@ -4,7 +4,7 @@ import "time"
 
 type AssignmentNotification struct {
 	AssignmentID int
-	Timestamp    time.Time
+	Before       time.Duration
 }
 
 type StudySessionNotification struct {

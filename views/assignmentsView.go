@@ -63,7 +63,7 @@ func AssignmentView(interactionCreate *discordgo.InteractionCreate, assignment c
 	}
 }
 
-func AssignmentActions(interactionCreate *discordgo.InteractionCreate) *discordgo.ActionsRow {
+func AssignmentActions(interactionCreate *discordgo.InteractionCreate, assignment clients.Assignment) *discordgo.ActionsRow {
 	return &discordgo.ActionsRow{
 		Components: []discordgo.MessageComponent{
 			discordgo.Button{
@@ -72,7 +72,7 @@ func AssignmentActions(interactionCreate *discordgo.InteractionCreate) *discordg
 				},
 				Label:    "update",
 				Style:    discordgo.PrimaryButton,
-				CustomID: "updateAssignmentAction",
+				CustomID: fmt.Sprintf("updateAssignmentAction_%d", assignment.ID),
 			},
 			discordgo.Button{
 				Emoji: &discordgo.ComponentEmoji{
@@ -80,13 +80,24 @@ func AssignmentActions(interactionCreate *discordgo.InteractionCreate) *discordg
 				},
 				Label:    "delete",
 				Style:    discordgo.SecondaryButton,
-				CustomID: "deleteAssignmentAction",
+				CustomID: fmt.Sprintf("deleteAssignmentAction_%d", assignment.ID),
 			},
 		},
 	}
 }
 
-func AssignmentModal() []discordgo.MessageComponent {
+func AssignmentModal(assignment *clients.Assignment) []discordgo.MessageComponent {
+
+	newAssignment := assignment == nil
+
+	if newAssignment {
+		assignment = &clients.Assignment{
+			// placeholder data
+			Name: "Assignment 1",
+			Due:  time.Now(),
+			Link: "https://canvas.instructure.com",
+		}
+	}
 	return []discordgo.MessageComponent{
 		discordgo.ActionsRow{
 			Components: []discordgo.MessageComponent{
@@ -94,8 +105,8 @@ func AssignmentModal() []discordgo.MessageComponent {
 					CustomID:    "assignmentName",
 					Label:       "assignment name:",
 					Style:       discordgo.TextInputShort,
-					Placeholder: "Assignment 1",
-					Required:    true,
+					Placeholder: assignment.Name,
+					Required:    newAssignment,
 					MaxLength:   50,
 				},
 			},
@@ -106,8 +117,8 @@ func AssignmentModal() []discordgo.MessageComponent {
 					CustomID:    "assignmentDue",
 					Label:       "due date:",
 					Style:       discordgo.TextInputShort,
-					Placeholder: time.Now().Format(time.RFC1123),
-					Required:    true,
+					Placeholder: assignment.Due.Format(time.RFC1123),
+					Required:    newAssignment,
 					MaxLength:   50,
 				},
 			},
@@ -118,7 +129,7 @@ func AssignmentModal() []discordgo.MessageComponent {
 					CustomID:    "assignmentLink",
 					Label:       "link:",
 					Style:       discordgo.TextInputShort,
-					Placeholder: "https://canvas.instructure.com",
+					Placeholder: assignment.Link,
 					Required:    false,
 					MaxLength:   50,
 				},

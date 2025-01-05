@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -17,8 +18,8 @@ type Assignment struct {
 	ID       int       `json:"id,omitempty"`
 	Course   int       `json:"course,omitempty"`
 	CourseID string    `json:"course_id,omitempty"`
-	Name     string    `json:"name"`
-	Due      time.Time `json:"due"`
+	Name     string    `json:"name,omitempty"`
+	Due      time.Time `json:"due,omitempty"`
 	Link     string    `json:"link,omitempty"`
 }
 
@@ -125,6 +126,7 @@ func CreateAssignment(assignment Assignment) (Assignment, error) {
 func UpdateAssignment(assignment Assignment) (Assignment, error) {
 	sentry.StartSpan(context.TODO(), "updateAssignment")
 	jsonBody, err := json.Marshal(assignment)
+	slog.Info(string(jsonBody))
 	if err != nil {
 		return Assignment{}, fmt.Errorf("failed to marshal assignment: %w", err)
 	}
