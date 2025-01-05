@@ -1,6 +1,7 @@
 package interactions
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/dragonejt/hakase-discord/clients"
 	"github.com/dragonejt/hakase-discord/notifications"
 	"github.com/dragonejt/hakase-discord/views"
+	"github.com/getsentry/sentry-go"
 )
 
 func AddAssignment(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
@@ -44,6 +46,7 @@ func AddAssignment(bot *discordgo.Session, interactionCreate *discordgo.Interact
 
 func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 	slog.Info(fmt.Sprintf("addAssignmentSubmit executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
+	sentry.StartTransaction(context.Background(), "addAssignment")
 	err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseDeferredMessageUpdate,
 	})

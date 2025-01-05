@@ -11,7 +11,7 @@ import (
 )
 
 func GuildCreate(bot *discordgo.Session, guildCreate *discordgo.GuildCreate) {
-	sentry.StartTransaction(context.TODO(), "guildCreate")
+	sentry.StartTransaction(context.Background(), "guildCreate")
 	slog.Info(fmt.Sprintf("added to guild: %s (%s)", guildCreate.Guild.Name, guildCreate.Guild.ID))
 	course := clients.Course{
 		CourseID: guildCreate.Guild.ID,
@@ -28,7 +28,7 @@ func GuildCreate(bot *discordgo.Session, guildCreate *discordgo.GuildCreate) {
 }
 
 func GuildDelete(bot *discordgo.Session, guildDelete *discordgo.GuildDelete) {
-	sentry.StartTransaction(context.TODO(), "guildDelete")
+	sentry.StartTransaction(context.Background(), "guildDelete")
 	slog.Info(fmt.Sprintf("removed from guild: %s (%s)", guildDelete.Guild.Name, guildDelete.Guild.ID))
 	err := clients.DeleteCourse(guildDelete.Guild.ID)
 	if err != nil {

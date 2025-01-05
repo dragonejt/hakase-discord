@@ -1,12 +1,14 @@
 package interactions
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/dragonejt/hakase-discord/clients"
 	"github.com/dragonejt/hakase-discord/views"
+	"github.com/getsentry/sentry-go"
 )
 
 var AssignmentsCommand = discordgo.ApplicationCommand{
@@ -37,6 +39,7 @@ func SlashAssignments(bot *discordgo.Session, interactionCreate *discordgo.Inter
 	}
 
 	slog.Info(fmt.Sprintf("/assignments executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
+	sentry.StartTransaction(context.Background(), "/assignments")
 
 	assignmentID, exists := optionMap["id"]
 	if exists {

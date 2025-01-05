@@ -1,6 +1,7 @@
 package interactions
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"math/rand"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/dragonejt/hakase-discord/clients"
+	"github.com/getsentry/sentry-go"
 )
 
 var HakaseCommand = discordgo.ApplicationCommand{
@@ -49,6 +51,7 @@ func SlashHakase(bot *discordgo.Session, interactionCreate *discordgo.Interactio
 	}
 
 	slog.Info(fmt.Sprintf("/hakase executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
+	sentry.StartTransaction(context.Background(), "/hakase")
 
 	subcommand, exists := optionMap["cmd"]
 	if !exists {

@@ -51,7 +51,7 @@ func publishMessage(subject string, message []byte) error {
 }
 
 func PublishNotification(notification string) {
-	sentry.StartSpan(context.TODO(), "publishNotification")
+	sentry.StartSpan(context.Background(), "publishNotification")
 	err := publishMessage("notifications", []byte(notification))
 	if err != nil {
 		slog.Error(err.Error())
@@ -60,7 +60,7 @@ func PublishNotification(notification string) {
 }
 
 func PublishAssignmentNotification(notification AssignmentNotification) {
-	sentry.StartSpan(context.TODO(), "publishAssignmentNotification")
+	sentry.StartSpan(context.Background(), "publishAssignmentNotification")
 	message, err := json.Marshal(notification)
 	if err != nil {
 		slog.Error(err.Error())
@@ -74,7 +74,7 @@ func PublishAssignmentNotification(notification AssignmentNotification) {
 }
 
 func PublishStudySessionNotification(notification StudySessionNotification) {
-	sentry.StartSpan(context.TODO(), "publishStudySessionNotification")
+	sentry.StartSpan(context.Background(), "publishStudySessionNotification")
 	message, err := json.Marshal(notification)
 	if err != nil {
 		slog.Error(err.Error())

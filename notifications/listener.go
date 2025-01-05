@@ -70,7 +70,7 @@ func ListenToStream(stopListener chan bool) {
 }
 
 func consumeMessage(message jetstream.Msg) {
-	sentry.StartSpan(context.TODO(), "consumeMessage")
+	sentry.StartSpan(context.Background(), "consumeMessage")
 	slog.Info(fmt.Sprintf("received message: %s with subject: %s", string(message.Data()), message.Subject()))
 	err := message.Ack()
 	if err != nil {

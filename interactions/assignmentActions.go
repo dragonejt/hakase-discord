@@ -1,6 +1,7 @@
 package interactions
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"strings"
@@ -10,6 +11,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/dragonejt/hakase-discord/clients"
 	"github.com/dragonejt/hakase-discord/views"
+	"github.com/getsentry/sentry-go"
 )
 
 func UpdateAssignment(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
@@ -58,6 +60,7 @@ func UpdateAssignment(bot *discordgo.Session, interactionCreate *discordgo.Inter
 
 func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 	slog.Info(fmt.Sprintf("updateAssignmentSubmit executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
+	sentry.StartTransaction(context.Background(), "updateAssignment")
 	err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseDeferredMessageUpdate,
 	})
@@ -132,6 +135,7 @@ func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo
 
 func DeleteAssignment(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 	slog.Debug(fmt.Sprintf("deleteAssignment executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
+	sentry.StartSpan(context.Background(), "deleteAssignment")
 	assignmentID := strings.Split(interactionCreate.MessageComponentData().CustomID, "_")[1]
 	err := clients.DeleteAssignment(assignmentID)
 	if err != nil {

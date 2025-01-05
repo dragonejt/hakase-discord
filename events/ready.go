@@ -11,7 +11,7 @@ import (
 )
 
 func Ready(bot *discordgo.Session, ready *discordgo.Ready) {
-	sentry.StartTransaction(context.TODO(), "ready")
+	sentry.StartTransaction(context.Background(), "ready")
 	slog.Info(fmt.Sprintf("logged in as %s", ready.User.String()))
 	notifications.PublishNotification(fmt.Sprintf("logged in as %s", ready.User.String()))
 
