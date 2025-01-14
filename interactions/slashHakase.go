@@ -70,7 +70,7 @@ func ping(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate
 		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 	}
 	_, err = clients.ReadCourse(interactionCreate.GuildID)
 	if err != nil {
@@ -82,7 +82,7 @@ func ping(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate
 		Content: &pong,
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 	}
 
 }
@@ -95,6 +95,6 @@ func rockPaperScissors(bot *discordgo.Session, interactionCreate *discordgo.Inte
 		},
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 	}
 }

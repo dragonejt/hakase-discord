@@ -18,7 +18,7 @@ func InteractionCreate(bot *discordgo.Session, interactionCreate *discordgo.Inte
 		case "hakase":
 			interactions.SlashHakase(bot, interactionCreate)
 		default:
-			slog.Error(fmt.Sprintf("unknown command: %s", interactionCreate.ApplicationCommandData().Name))
+			slog.Error(fmt.Sprintf("Unknown Command: %s", interactionCreate.ApplicationCommandData().Name))
 		}
 	case discordgo.InteractionMessageComponent:
 		customID := interactionCreate.MessageComponentData().CustomID
@@ -29,7 +29,7 @@ func InteractionCreate(bot *discordgo.Session, interactionCreate *discordgo.Inte
 		} else if strings.HasPrefix(customID, "deleteAssignmentAction") {
 			interactions.DeleteAssignment(bot, interactionCreate)
 		} else {
-			slog.Error(fmt.Sprintf("unknown message component action: %s", customID))
+			slog.Error(fmt.Sprintf("Unknown Message Component Action: %s", customID))
 		}
 	case discordgo.InteractionModalSubmit:
 		customID := interactionCreate.ModalSubmitData().CustomID
@@ -38,10 +38,10 @@ func InteractionCreate(bot *discordgo.Session, interactionCreate *discordgo.Inte
 		} else if strings.HasPrefix(customID, "updateAssignment") {
 			interactions.UpdateAssignmentSubmit(bot, interactionCreate)
 		} else {
-			slog.Error(fmt.Sprintf("unknown modal submit: %s", interactionCreate.ModalSubmitData().CustomID))
+			slog.Error(fmt.Sprintf("Unknown Modal Submit: %s", interactionCreate.ModalSubmitData().CustomID))
 		}
 	default:
-		slog.Error(fmt.Sprintf("unknown interaction type: %d", interactionCreate.Type))
+		slog.Error(fmt.Sprintf("Unknown Interaction Type: %d", interactionCreate.Type))
 
 	}
 }

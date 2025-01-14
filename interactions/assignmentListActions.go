@@ -25,7 +25,7 @@ func AddAssignment(bot *discordgo.Session, interactionCreate *discordgo.Interact
 			},
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 		}
 		return
 	}
@@ -39,7 +39,7 @@ func AddAssignment(bot *discordgo.Session, interactionCreate *discordgo.Interact
 		},
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 	}
 
 }
@@ -51,7 +51,7 @@ func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.In
 		Type: discordgo.InteractionResponseDeferredMessageUpdate,
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 	}
 
 	assignmentData := interactionCreate.ModalSubmitData()
@@ -61,7 +61,7 @@ func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.In
 			Content: fmt.Sprintf("error parsing due date: %s", err.Error()),
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 		}
 		return
 	}
@@ -81,7 +81,7 @@ func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.In
 			Content: "due date before current time! hakase does not support this.",
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 		}
 		return
 	}
@@ -93,7 +93,7 @@ func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.In
 			Flags:   discordgo.MessageFlagsEphemeral,
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 		}
 		return
 	}
@@ -114,6 +114,6 @@ func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.In
 		Components: []discordgo.MessageComponent{views.AssignmentActions(interactionCreate, createdAssignment)},
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 	}
 }

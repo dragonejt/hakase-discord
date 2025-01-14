@@ -27,7 +27,7 @@ func main() {
 			Environment:        settings.ENV,
 		})
 		if err != nil {
-			slog.Warn(fmt.Sprintf("error initiating sentry: %s", err))
+			slog.Warn(fmt.Sprintf("Error Initiating Sentry: %s", err))
 		}
 
 	} else {
@@ -36,7 +36,7 @@ func main() {
 
 	bot, err := discordgo.New(fmt.Sprintf("Bot %s", settings.DISCORD_BOT_TOKEN))
 	if err != nil {
-		slog.Error(fmt.Sprintf("error creating discord session: %s", err.Error()))
+		slog.Error(fmt.Sprintf("Error Creating Discord Session: %s", err.Error()))
 		return
 	}
 	bot.StateEnabled = true
@@ -46,25 +46,25 @@ func main() {
 
 	err = bot.Open()
 	if err != nil {
-		slog.Error(fmt.Sprintf("error opening connection to discord: %s", err.Error()))
+		slog.Error(fmt.Sprintf("Error Opening Connection to Discord: %s", err.Error()))
 		return
 	}
 	defer bot.Close()
 
-	slog.Info("registering event handlers")
+	slog.Info("Registering Event Handlers")
 	bot.AddHandler(events.Ready)
 	bot.AddHandler(events.GuildCreate)
 	bot.AddHandler(events.GuildDelete)
 	bot.AddHandler(events.InteractionCreate)
 
-	slog.Info("registering interactions")
+	slog.Info("Registering Interactions")
 	interactions := []*discordgo.ApplicationCommand{&interactions.AssignmentsCommand, &interactions.HakaseCommand}
 	for _, cmd := range interactions {
 		_, err = bot.ApplicationCommandCreate(bot.State.User.ID, "", cmd)
 		if err != nil {
-			slog.Error(fmt.Sprintf("error registering command: %s, %s", cmd.Name, err.Error()))
+			slog.Error(fmt.Sprintf("Error Registering Command: %s, %s", cmd.Name, err.Error()))
 		} else {
-			slog.Info(fmt.Sprintf("successfully registered command: %s", cmd.Name))
+			slog.Info(fmt.Sprintf("Successfully Registered Command: %s", cmd.Name))
 		}
 	}
 

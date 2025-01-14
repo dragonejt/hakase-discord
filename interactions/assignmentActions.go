@@ -15,17 +15,17 @@ import (
 )
 
 func UpdateAssignment(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-	slog.Debug(fmt.Sprintf("updateAssignment executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
+	slog.Debug(fmt.Sprintf("updateAssignment Executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
 	if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
-				Content: "admin permissions needed!",
+				Content: "Admin Permissions Needed!",
 				Flags:   discordgo.MessageFlagsEphemeral,
 			},
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 		}
 		return
 	}
@@ -42,7 +42,7 @@ func UpdateAssignment(bot *discordgo.Session, interactionCreate *discordgo.Inter
 			},
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 		}
 	}
 	err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -54,7 +54,7 @@ func UpdateAssignment(bot *discordgo.Session, interactionCreate *discordgo.Inter
 		},
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 	}
 }
 
@@ -65,7 +65,7 @@ func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo
 		Type: discordgo.InteractionResponseDeferredMessageUpdate,
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 	}
 
 	assignmentID := strings.Split(interactionCreate.ModalSubmitData().CustomID, "_")[1]
@@ -78,10 +78,10 @@ func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo
 		due, err := dateparse.ParseAny(assignmentData.Components[1].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value)
 		if err != nil {
 			_, err := bot.FollowupMessageCreate(interactionCreate.Interaction, false, &discordgo.WebhookParams{
-				Content: fmt.Sprintf("error parsing due date: %s", err.Error()),
+				Content: fmt.Sprintf("Error Parsing Due Date: %s", err.Error()),
 			})
 			if err != nil {
-				slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+				slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 			}
 			return
 		}
@@ -101,10 +101,10 @@ func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo
 		assignment.Due = currentAssignment.Due
 	} else if err == nil && assignment.Due.Before(currentAssignment.Due) {
 		_, err := bot.FollowupMessageCreate(interactionCreate.Interaction, false, &discordgo.WebhookParams{
-			Content: "new due date before original assignment due date! hakase does not support this.",
+			Content: "New Due Date before Original Assignment Due Date! hakase does not support this.",
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 		}
 		return
 	}
@@ -112,13 +112,13 @@ func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo
 	assignment.ID = currentAssignment.ID
 	updatedAssignment, err := clients.UpdateAssignment(assignment)
 	if err != nil {
-		slog.Error(fmt.Sprintf("error updating assignment: %s", err.Error()))
+		slog.Error(fmt.Sprintf("Error Updating Assignment: %s", err.Error()))
 		_, err := bot.FollowupMessageCreate(interactionCreate.Interaction, false, &discordgo.WebhookParams{
 			Content: err.Error(),
 			Flags:   discordgo.MessageFlagsEphemeral,
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 		}
 		return
 	}
@@ -129,7 +129,7 @@ func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo
 		Components: []discordgo.MessageComponent{views.AssignmentActions(interactionCreate, updatedAssignment)},
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 	}
 }
 
@@ -139,16 +139,16 @@ func DeleteAssignment(bot *discordgo.Session, interactionCreate *discordgo.Inter
 	assignmentID := strings.Split(interactionCreate.MessageComponentData().CustomID, "_")[1]
 	err := clients.DeleteAssignment(assignmentID)
 	if err != nil {
-		slog.Error(fmt.Sprintf("unable to delete assignment %s: %s", assignmentID, err.Error()))
+		slog.Error(fmt.Sprintf("Unable to Delete Assignment %s: %s", assignmentID, err.Error()))
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
-				Content: fmt.Sprintf("unable to delete assignment %s: %s", assignmentID, err.Error()),
+				Content: fmt.Sprintf("Unable to Delete Assignment %s: %s", assignmentID, err.Error()),
 				Flags:   discordgo.MessageFlagsEphemeral,
 			},
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 		}
 		return
 	}
@@ -156,10 +156,10 @@ func DeleteAssignment(bot *discordgo.Session, interactionCreate *discordgo.Inter
 	err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("assignment %s deleted!", assignmentID),
+			Content: fmt.Sprintf("Assignment %s Deleted!", assignmentID),
 		},
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 	}
 }

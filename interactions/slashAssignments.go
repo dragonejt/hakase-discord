@@ -29,7 +29,7 @@ func SlashAssignments(bot *discordgo.Session, interactionCreate *discordgo.Inter
 		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 		return
 	}
 
@@ -60,7 +60,7 @@ func getAssignment(bot *discordgo.Session, interactionCreate *discordgo.Interact
 			Content: &errMsg,
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 		}
 	} else {
 		_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
@@ -68,7 +68,7 @@ func getAssignment(bot *discordgo.Session, interactionCreate *discordgo.Interact
 			Components: &[]discordgo.MessageComponent{views.AssignmentActions(interactionCreate, assignment)},
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 		}
 	}
 }
@@ -82,7 +82,7 @@ func listAssignments(bot *discordgo.Session, interactionCreate *discordgo.Intera
 			Content: &errMsg,
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 		}
 	} else {
 		_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
@@ -90,7 +90,7 @@ func listAssignments(bot *discordgo.Session, interactionCreate *discordgo.Intera
 			Components: &[]discordgo.MessageComponent{views.AssignmentsListActions(interactionCreate)},
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(fmt.Sprintf("Error Responding to Interaction: %s", err.Error()))
 		}
 	}
 }

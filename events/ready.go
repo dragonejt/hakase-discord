@@ -12,11 +12,11 @@ import (
 
 func Ready(bot *discordgo.Session, ready *discordgo.Ready) {
 	sentry.StartTransaction(context.Background(), "ready")
-	slog.Info(fmt.Sprintf("logged in as %s", ready.User.String()))
-	notifications.PublishNotification(fmt.Sprintf("logged in as %s", ready.User.String()))
+	slog.Info(fmt.Sprintf("Logged In as %s", ready.User.String()))
+	notifications.PublishNotification(fmt.Sprintf("Logged In as %s", ready.User.String()))
 
-	err := bot.UpdateCustomStatus(fmt.Sprintf("assisting %d classes", len(bot.State.Guilds)))
+	err := bot.UpdateCustomStatus(fmt.Sprintf("Assisting %d Classes", len(bot.State.Guilds)))
 	if err != nil {
-		slog.Error(fmt.Sprintf("failed to update status: %s", err))
+		slog.Error(fmt.Sprintf("Failed to Update Status: %s", err))
 	}
 }
