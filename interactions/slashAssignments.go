@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/dragonejt/hakase-discord/clients"
@@ -39,7 +40,9 @@ func SlashAssignments(bot *discordgo.Session, interactionCreate *discordgo.Inter
 	}
 
 	slog.Info(fmt.Sprintf("/assignments executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
-	sentry.StartTransaction(context.Background(), "/assignments")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	sentry.StartTransaction(ctx, "/assignments")
 
 	assignmentID, exists := optionMap["id"]
 	if exists {
