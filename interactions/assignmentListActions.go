@@ -112,8 +112,8 @@ func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.In
 
 	_, err = bot.FollowupMessageCreate(interactionCreate.Interaction, false, &discordgo.WebhookParams{
 		Content:    "assignment created!",
-		Embeds:     []*discordgo.MessageEmbed{views.AssignmentView(interactionCreate, createdAssignment)},
-		Components: []discordgo.MessageComponent{views.AssignmentActions(interactionCreate, createdAssignment)},
+		Embeds:     []*discordgo.MessageEmbed{views.AssignmentView(interactionCreate.Member, createdAssignment)},
+		Components: []discordgo.MessageComponent{views.AssignmentActions(createdAssignment)},
 	})
 	if err != nil {
 		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))

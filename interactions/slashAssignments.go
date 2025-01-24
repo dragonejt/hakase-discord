@@ -67,8 +67,8 @@ func getAssignment(bot *discordgo.Session, interactionCreate *discordgo.Interact
 		}
 	} else {
 		_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
-			Embeds:     &[]*discordgo.MessageEmbed{views.AssignmentView(interactionCreate, assignment)},
-			Components: &[]discordgo.MessageComponent{views.AssignmentActions(interactionCreate, assignment)},
+			Embeds:     &[]*discordgo.MessageEmbed{views.AssignmentView(interactionCreate.Member, assignment)},
+			Components: &[]discordgo.MessageComponent{views.AssignmentActions(assignment)},
 		})
 		if err != nil {
 			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
@@ -89,8 +89,8 @@ func listAssignments(bot *discordgo.Session, interactionCreate *discordgo.Intera
 		}
 	} else {
 		_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
-			Embeds:     &[]*discordgo.MessageEmbed{views.AssignmentsListView(interactionCreate, assignments)},
-			Components: &[]discordgo.MessageComponent{views.AssignmentsListActions(interactionCreate)},
+			Embeds:     &[]*discordgo.MessageEmbed{views.AssignmentsListView(interactionCreate.Member, assignments)},
+			Components: &[]discordgo.MessageComponent{views.AssignmentsListActions()},
 		})
 		if err != nil {
 			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))

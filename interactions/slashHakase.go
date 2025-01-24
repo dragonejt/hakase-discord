@@ -9,6 +9,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/dragonejt/hakase-discord/clients"
+	"github.com/dragonejt/hakase-discord/views"
 	"github.com/getsentry/sentry-go"
 )
 
@@ -62,6 +63,8 @@ func SlashHakase(bot *discordgo.Session, interactionCreate *discordgo.Interactio
 		switch subcommand.StringValue() {
 		case "rock-paper-scissors":
 			rockPaperScissors(bot, interactionCreate)
+		case "config":
+			config(bot, interactionCreate)
 		}
 	}
 }
@@ -95,6 +98,35 @@ func rockPaperScissors(bot *discordgo.Session, interactionCreate *discordgo.Inte
 		Data: &discordgo.InteractionResponseData{
 			Content: rockPaperScissorsGIFS[rand.Intn(len(rockPaperScissorsGIFS))],
 		},
+	})
+	if err != nil {
+		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+	}
+}
+
+func config(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+	err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+	})
+	if err != nil {
+		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+	}
+
+	course, err := clients.ReadCourse(interactionCreate.GuildID)
+	if err != nil {
+		errMsg := fmt.Sprintf("error reading course: %s", err.Error())
+		slog.Error(errMsg)
+		_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
+			Content: &errMsg,
+		})
+		if err != nil {
+			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		}
+	}
+
+	_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
+		Embeds:     &[]*discordgo.MessageEmbed{views.ConfigView(course)},
+		Components: &[]discordgo.MessageComponent{views.ConfigActions()},
 	})
 	if err != nil {
 		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
