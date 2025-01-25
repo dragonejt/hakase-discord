@@ -51,9 +51,9 @@ func publishMessage(subject string, message []byte) error {
 }
 
 func PublishNotification(notification string) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	sentry.StartSpan(ctx, "publishNotification")
+	span := sentry.StartSpan(context.TODO(), "publishNotification")
+	defer span.Finish()
+
 	err := publishMessage("notifications", []byte(notification))
 	if err != nil {
 		slog.Error(err.Error())
@@ -62,9 +62,9 @@ func PublishNotification(notification string) {
 }
 
 func PublishAssignmentNotification(notification AssignmentNotification) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	sentry.StartSpan(ctx, "publishAssignmentNotification")
+	span := sentry.StartSpan(context.TODO(), "publishAssignmentNotification")
+	defer span.Finish()
+
 	message, err := json.Marshal(notification)
 	if err != nil {
 		slog.Error(err.Error())
@@ -78,9 +78,9 @@ func PublishAssignmentNotification(notification AssignmentNotification) {
 }
 
 func PublishStudySessionNotification(notification StudySessionNotification) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	sentry.StartSpan(ctx, "publishStudySessionNotification")
+	span := sentry.StartSpan(context.TODO(), "publishStudySessionNotification")
+	defer span.Finish()
+
 	message, err := json.Marshal(notification)
 	if err != nil {
 		slog.Error(err.Error())

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/dragonejt/hakase-discord/notifications"
@@ -12,10 +11,10 @@ import (
 )
 
 func Ready(bot *discordgo.Session, ready *discordgo.Ready) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	sentry.StartTransaction(ctx, "ready")
+	transaction := sentry.StartTransaction(context.TODO(), "ready")
+	defer transaction.Finish()
 	slog.Info(fmt.Sprintf("logged in as %s", ready.User.String()))
+
 	notifications.PublishNotification(fmt.Sprintf("logged in as %s", ready.User.String()))
 
 	err := bot.UpdateCustomStatus(fmt.Sprintf("assisting %d classes", len(bot.State.Guilds)))

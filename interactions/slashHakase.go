@@ -52,9 +52,8 @@ func SlashHakase(bot *discordgo.Session, interactionCreate *discordgo.Interactio
 	}
 
 	slog.Info(fmt.Sprintf("/hakase executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	sentry.StartTransaction((ctx), "/hakase")
+	transaction := sentry.StartTransaction(context.TODO(), "/hakase")
+	defer transaction.Finish()
 
 	subcommand, exists := optionMap["cmd"]
 	if !exists {

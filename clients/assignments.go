@@ -23,9 +23,9 @@ type Assignment struct {
 }
 
 func ReadAssignment(assignmentID string) (Assignment, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	sentry.StartSpan(ctx, "readAssignment")
+	span := sentry.StartSpan(context.TODO(), "readAssignment")
+	defer span.Finish()
+
 	assignment := Assignment{}
 
 	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/assignments?id=%s", settings.BACKEND_URL, assignmentID), nil)
@@ -57,9 +57,9 @@ func ReadAssignment(assignmentID string) (Assignment, error) {
 }
 
 func ListAssignments(courseID string) ([]Assignment, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	sentry.StartSpan(ctx, "listAssignments")
+	span := sentry.StartSpan(context.TODO(), "listAssignments")
+	defer span.Finish()
+
 	assignments := []Assignment{}
 
 	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/assignments?course_id=%s", settings.BACKEND_URL, courseID), nil)
@@ -91,9 +91,9 @@ func ListAssignments(courseID string) ([]Assignment, error) {
 }
 
 func CreateAssignment(assignment Assignment) (Assignment, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	sentry.StartSpan(ctx, "createAssignment")
+	span := sentry.StartSpan(context.TODO(), "createAssignment")
+	defer span.Finish()
+
 	jsonBody, err := json.Marshal(assignment)
 	if err != nil {
 		return Assignment{}, fmt.Errorf("failed to marshal assignment: %w", err)
@@ -129,9 +129,9 @@ func CreateAssignment(assignment Assignment) (Assignment, error) {
 }
 
 func UpdateAssignment(assignment Assignment) (Assignment, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	sentry.StartSpan(ctx, "updateAssignment")
+	span := sentry.StartSpan(context.TODO(), "updateAssignment")
+	defer span.Finish()
+
 	jsonBody, err := json.Marshal(assignment)
 	if err != nil {
 		return Assignment{}, fmt.Errorf("failed to marshal assignment: %w", err)
@@ -167,9 +167,9 @@ func UpdateAssignment(assignment Assignment) (Assignment, error) {
 }
 
 func DeleteAssignment(assignmentID string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	sentry.StartSpan(ctx, "deleteAssignment")
+	span := sentry.StartSpan(context.TODO(), "deleteAssignment")
+	defer span.Finish()
+
 	request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/assignments?id=%s", settings.BACKEND_URL, assignmentID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create API request: %w", err)

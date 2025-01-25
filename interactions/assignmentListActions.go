@@ -46,9 +46,9 @@ func AddAssignment(bot *discordgo.Session, interactionCreate *discordgo.Interact
 
 func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 	slog.Info(fmt.Sprintf("addAssignmentSubmit executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	sentry.StartTransaction(ctx, "addAssignment")
+	transaction := sentry.StartTransaction(context.TODO(), "addAssignment")
+	defer transaction.Finish()
+
 	err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseDeferredMessageUpdate,
 	})

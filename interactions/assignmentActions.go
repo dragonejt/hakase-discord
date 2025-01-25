@@ -60,9 +60,9 @@ func UpdateAssignment(bot *discordgo.Session, interactionCreate *discordgo.Inter
 
 func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 	slog.Info(fmt.Sprintf("updateAssignmentSubmit executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	sentry.StartTransaction(ctx, "updateAssignment")
+	transaction := sentry.StartTransaction(context.TODO(), "updateAssignment")
+	defer transaction.Finish()
+
 	err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseDeferredMessageUpdate,
 	})
@@ -137,9 +137,9 @@ func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo
 
 func DeleteAssignment(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 	slog.Debug(fmt.Sprintf("deleteAssignment executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	sentry.StartSpan(ctx, "deleteAssignment")
+	span := sentry.StartSpan(context.TODO(), "deleteAssignment")
+	defer span.Finish()
+
 	assignmentID := strings.Split(interactionCreate.MessageComponentData().CustomID, "_")[1]
 	err := clients.DeleteAssignment(assignmentID)
 	if err != nil {
