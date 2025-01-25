@@ -21,8 +21,9 @@ func main() {
 	if !settings.DEBUG {
 		err := sentry.Init(sentry.ClientOptions{
 			Dsn:                "https://701b4c4b27e3aeb9ab991b282df7c705@o4507124907638784.ingest.us.sentry.io/4508476074360832",
-			TracesSampleRate:   0.1,
-			ProfilesSampleRate: 1,
+			Debug:              true,
+			TracesSampleRate:   1.0,
+			ProfilesSampleRate: 1.0,
 			EnableTracing:      true,
 			Environment:        settings.ENV,
 		})

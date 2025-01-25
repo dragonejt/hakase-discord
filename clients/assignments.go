@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log/slog"
 	"net/http"
 	"time"
 
@@ -134,7 +133,6 @@ func UpdateAssignment(assignment Assignment) (Assignment, error) {
 	defer cancel()
 	sentry.StartSpan(ctx, "updateAssignment")
 	jsonBody, err := json.Marshal(assignment)
-	slog.Info(string(jsonBody))
 	if err != nil {
 		return Assignment{}, fmt.Errorf("failed to marshal assignment: %w", err)
 	}

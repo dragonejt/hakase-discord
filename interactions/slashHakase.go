@@ -72,7 +72,7 @@ func SlashHakase(bot *discordgo.Session, interactionCreate *discordgo.Interactio
 func ping(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 	start := time.Now()
 
-	_, err := clients.ListAssignments(interactionCreate.GuildID)
+	_, err := clients.ReadCourse(interactionCreate.GuildID)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error pinging backend: %s", err.Error()))
 	}
