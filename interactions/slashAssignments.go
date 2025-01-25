@@ -26,14 +26,6 @@ var AssignmentsCommand = discordgo.ApplicationCommand{
 }
 
 func SlashAssignments(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-	err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
-	})
-	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
-		return
-	}
-
 	optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(interactionCreate.ApplicationCommandData().Options))
 	for _, opt := range interactionCreate.ApplicationCommandData().Options {
 		optionMap[opt.Name] = opt
@@ -58,17 +50,22 @@ func getAssignment(bot *discordgo.Session, interactionCreate *discordgo.Interact
 	assignment, err := clients.ReadAssignment(assignmentID)
 
 	if err != nil {
-		errMsg := err.Error()
-		_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
-			Content: &errMsg,
+		err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: err.Error(),
+			},
 		})
 		if err != nil {
 			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
 		}
 	} else {
-		_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
-			Embeds:     &[]*discordgo.MessageEmbed{views.AssignmentView(interactionCreate.Member, assignment)},
-			Components: &[]discordgo.MessageComponent{views.AssignmentActions(assignment)},
+		err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds:     []*discordgo.MessageEmbed{views.AssignmentView(interactionCreate.Member, assignment)},
+				Components: []discordgo.MessageComponent{views.AssignmentActions(assignment)},
+			},
 		})
 		if err != nil {
 			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
@@ -80,17 +77,22 @@ func listAssignments(bot *discordgo.Session, interactionCreate *discordgo.Intera
 	assignments, err := clients.ListAssignments(interactionCreate.GuildID)
 
 	if err != nil {
-		errMsg := err.Error()
-		_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
-			Content: &errMsg,
+		err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: err.Error(),
+			},
 		})
 		if err != nil {
 			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
 		}
 	} else {
-		_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
-			Embeds:     &[]*discordgo.MessageEmbed{views.AssignmentsListView(interactionCreate.Member, assignments)},
-			Components: &[]discordgo.MessageComponent{views.AssignmentsListActions()},
+		err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds:     []*discordgo.MessageEmbed{views.AssignmentsListView(interactionCreate.Member, assignments)},
+				Components: []discordgo.MessageComponent{views.AssignmentsListActions()},
+			},
 		})
 		if err != nil {
 			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))

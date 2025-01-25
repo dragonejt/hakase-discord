@@ -71,20 +71,17 @@ func SlashHakase(bot *discordgo.Session, interactionCreate *discordgo.Interactio
 
 func ping(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 	start := time.Now()
-	err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
-	})
-	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
-	}
-	_, err = clients.ReadCourse(interactionCreate.GuildID)
+
+	_, err := clients.ListAssignments(interactionCreate.GuildID)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error pinging backend: %s", err.Error()))
 	}
 
-	pong := fmt.Sprintf("hakase pong! response time: %dms", time.Since(start).Milliseconds())
-	_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
-		Content: &pong,
+	err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: fmt.Sprintf("hakase pong! response time: %dms", time.Since(start).Milliseconds()),
+		},
 	})
 	if err != nil {
 		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
@@ -105,28 +102,26 @@ func rockPaperScissors(bot *discordgo.Session, interactionCreate *discordgo.Inte
 }
 
 func config(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-	err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
-	})
-	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
-	}
-
 	course, err := clients.ReadCourse(interactionCreate.GuildID)
 	if err != nil {
-		errMsg := fmt.Sprintf("error reading course: %s", err.Error())
-		slog.Error(errMsg)
-		_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
-			Content: &errMsg,
+		slog.Error(fmt.Sprintf("error reading course: %s", err.Error()))
+		err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: fmt.Sprintf("error reading course: %s", err.Error()),
+			},
 		})
 		if err != nil {
 			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
 		}
 	}
 
-	_, err = bot.InteractionResponseEdit(interactionCreate.Interaction, &discordgo.WebhookEdit{
-		Embeds:     &[]*discordgo.MessageEmbed{views.ConfigView(course)},
-		Components: &[]discordgo.MessageComponent{views.ConfigActions()},
+	err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds:     []*discordgo.MessageEmbed{views.ConfigView(course)},
+			Components: views.ConfigActions(),
+		},
 	})
 	if err != nil {
 		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))

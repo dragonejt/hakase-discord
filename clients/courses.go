@@ -18,7 +18,7 @@ type Course struct {
 	Platform      int    `json:"platform,omitempty"`
 	CourseID      string `json:"course_id"`
 	NotifyChannel string `json:"notify_channel,omitempty"`
-	NotifyRole    string `json:"notify_role,omitempty"`
+	NotifyGroup   string `json:"notify_group,omitempty"`
 }
 
 func ReadCourse(courseID string) (Course, error) {

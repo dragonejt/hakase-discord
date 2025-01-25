@@ -28,6 +28,10 @@ func InteractionCreate(bot *discordgo.Session, interactionCreate *discordgo.Inte
 			interactions.UpdateAssignment(bot, interactionCreate)
 		} else if strings.HasPrefix(customID, "deleteAssignmentAction") {
 			interactions.DeleteAssignment(bot, interactionCreate)
+		} else if strings.HasPrefix(customID, "updateNotifyChannel") {
+			interactions.UpdateNotifyChannel(bot, interactionCreate)
+		} else if strings.HasPrefix(customID, "updateNotifyRole") {
+			interactions.UpdateNotifyRole(bot, interactionCreate)
 		} else {
 			slog.Error(fmt.Sprintf("unknown message component action: %s", customID))
 		}
