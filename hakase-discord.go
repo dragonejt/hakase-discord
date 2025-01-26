@@ -9,9 +9,9 @@ import (
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/dragonejt/hakase-discord/clients"
 	"github.com/dragonejt/hakase-discord/events"
 	"github.com/dragonejt/hakase-discord/interactions"
-	"github.com/dragonejt/hakase-discord/notifications"
 	"github.com/dragonejt/hakase-discord/settings"
 	"github.com/getsentry/sentry-go"
 )
@@ -42,7 +42,7 @@ func main() {
 	bot.StateEnabled = true
 
 	stopListener := make(chan bool, 1)
-	go notifications.ListenToStream(stopListener)
+	go clients.ListenToStream(bot, stopListener)
 
 	err = bot.Open()
 	if err != nil {

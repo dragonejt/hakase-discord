@@ -1,4 +1,4 @@
-package notifications
+package clients
 
 import (
 	"context"
@@ -6,13 +6,14 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/bwmarrin/discordgo"
 	"github.com/dragonejt/hakase-discord/settings"
 	"github.com/getsentry/sentry-go"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
-func ListenToStream(stopListener chan bool) {
+func ListenToStream(bot *discordgo.Session, stopListener chan bool) {
 	slog.Info(fmt.Sprintf("opening NATS consumer connection to: %s", settings.NATS_URL))
 	connection, err := nats.Connect(settings.NATS_URL)
 	if err != nil {
@@ -58,7 +59,9 @@ func ListenToStream(stopListener chan bool) {
 		return
 	}
 
-	subscription, err := consumer.Consume(consumeMessage)
+	subscription, err := consumer.Consume(func(message jetstream.Msg) {
+		consumeMessage(bot, message)
+	})
 	if err != nil {
 		slog.Error(err.Error())
 		return
@@ -69,9 +72,9 @@ func ListenToStream(stopListener chan bool) {
 
 }
 
-func consumeMessage(message jetstream.Msg) {
-	span := sentry.StartSpan(context.TODO(), "consumeMessage")
-	defer span.Finish()
+func consumeMessage(bot *discordgo.Session, message jetstream.Msg) {
+	transaction := sentry.StartTransaction(context.WithValue(context.Background(), DiscordSession{}, bot), "consumeMessage")
+	defer transaction.Finish()
 	slog.Info(fmt.Sprintf("received message: %s with subject: %s", string(message.Data()), message.Subject()))
 
 	err := message.Ack()

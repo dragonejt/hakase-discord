@@ -15,6 +15,8 @@ import (
 )
 
 func UpdateAssignment(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "updateAssignmentAction")
+	defer transaction.Finish()
 	slog.Debug(fmt.Sprintf("updateAssignment executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
 	if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -31,7 +33,7 @@ func UpdateAssignment(bot *discordgo.Session, interactionCreate *discordgo.Inter
 	}
 
 	assignmentID := strings.Split(interactionCreate.MessageComponentData().CustomID, "_")[1]
-	assignment, err := clients.ReadAssignment(assignmentID)
+	assignment, err := clients.ReadAssignment(transaction, assignmentID)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error reading assignment: %s", err.Error()))
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -60,7 +62,7 @@ func UpdateAssignment(bot *discordgo.Session, interactionCreate *discordgo.Inter
 
 func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 	slog.Info(fmt.Sprintf("updateAssignmentSubmit executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
-	transaction := sentry.StartTransaction(context.TODO(), "updateAssignment")
+	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "updateAssignmentSubmit")
 	defer transaction.Finish()
 
 	err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -98,7 +100,7 @@ func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo
 		assignment.Link = assignmentData.Components[2].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
 	}
 
-	currentAssignment, err := clients.ReadAssignment(assignmentID)
+	currentAssignment, err := clients.ReadAssignment(transaction, assignmentID)
 	if assignment.Due.Equal(time.Time{}) {
 		assignment.Due = currentAssignment.Due
 	} else if err == nil && assignment.Due.Before(currentAssignment.Due) {
@@ -112,7 +114,7 @@ func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo
 	}
 
 	assignment.ID = currentAssignment.ID
-	updatedAssignment, err := clients.UpdateAssignment(assignment)
+	updatedAssignment, err := clients.UpdateAssignment(transaction, assignment)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error updating assignment: %s", err.Error()))
 		_, err := bot.FollowupMessageCreate(interactionCreate.Interaction, false, &discordgo.WebhookParams{
@@ -137,11 +139,11 @@ func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo
 
 func DeleteAssignment(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 	slog.Debug(fmt.Sprintf("deleteAssignment executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
-	span := sentry.StartSpan(context.TODO(), "deleteAssignment")
-	defer span.Finish()
+	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "deleteAssignmentAction")
+	defer transaction.Finish()
 
 	assignmentID := strings.Split(interactionCreate.MessageComponentData().CustomID, "_")[1]
-	err := clients.DeleteAssignment(assignmentID)
+	err := clients.DeleteAssignment(transaction, assignmentID)
 	if err != nil {
 		slog.Error(fmt.Sprintf("unable to delete assignment %s: %s", assignmentID, err.Error()))
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{

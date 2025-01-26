@@ -31,21 +31,24 @@ func SlashAssignments(bot *discordgo.Session, interactionCreate *discordgo.Inter
 	}
 
 	slog.Info(fmt.Sprintf("/assignments executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
-	transaction := sentry.StartTransaction(context.TODO(), "/assignments")
+	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "/assignments")
 	defer transaction.Finish()
 
 	assignmentID, exists := optionMap["id"]
 	if exists {
-		getAssignment(bot, interactionCreate, fmt.Sprint(assignmentID.IntValue()))
+		getAssignment(transaction, interactionCreate, fmt.Sprint(assignmentID.IntValue()))
 
 	} else {
-		listAssignments(bot, interactionCreate)
+		listAssignments(transaction, interactionCreate)
 	}
 
 }
 
-func getAssignment(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate, assignmentID string) {
-	assignment, err := clients.ReadAssignment(assignmentID)
+func getAssignment(span *sentry.Span, interactionCreate *discordgo.InteractionCreate, assignmentID string) {
+	span = span.StartChild("/assignments getAssignment")
+	defer span.Finish()
+	bot := span.GetTransaction().Context().Value(clients.DiscordSession{}).(*discordgo.Session)
+	assignment, err := clients.ReadAssignment(span, assignmentID)
 
 	if err != nil {
 		err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -71,8 +74,11 @@ func getAssignment(bot *discordgo.Session, interactionCreate *discordgo.Interact
 	}
 }
 
-func listAssignments(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-	assignments, err := clients.ListAssignments(interactionCreate.GuildID)
+func listAssignments(span *sentry.Span, interactionCreate *discordgo.InteractionCreate) {
+	span = span.StartChild("/assignments listAssignments")
+	defer span.Finish()
+	bot := span.GetTransaction().Context().Value(clients.DiscordSession{}).(*discordgo.Session)
+	assignments, err := clients.ListAssignments(span, interactionCreate.GuildID)
 
 	if err != nil {
 		err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{

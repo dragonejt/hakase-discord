@@ -1,15 +1,19 @@
 package interactions
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/dragonejt/hakase-discord/clients"
 	"github.com/dragonejt/hakase-discord/views"
+	"github.com/getsentry/sentry-go"
 )
 
 func UpdateNotifyChannel(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "updateNotifyChannel")
+	defer transaction.Finish()
 	slog.Debug(fmt.Sprintf("updateNotifyChannel executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
 	if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -26,7 +30,7 @@ func UpdateNotifyChannel(bot *discordgo.Session, interactionCreate *discordgo.In
 	}
 
 	notifyChannel := interactionCreate.MessageComponentData().Values[0]
-	err := clients.UpdateCourse(clients.Course{
+	err := clients.UpdateCourse(transaction, clients.Course{
 		CourseID:      interactionCreate.GuildID,
 		NotifyChannel: notifyChannel,
 	})
@@ -44,7 +48,7 @@ func UpdateNotifyChannel(bot *discordgo.Session, interactionCreate *discordgo.In
 		}
 	}
 
-	updatedCourse, err := clients.ReadCourse(interactionCreate.GuildID)
+	updatedCourse, err := clients.ReadCourse(transaction, interactionCreate.GuildID)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error reading updated course: %s", err.Error()))
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -72,6 +76,8 @@ func UpdateNotifyChannel(bot *discordgo.Session, interactionCreate *discordgo.In
 }
 
 func UpdateNotifyRole(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "updateNotifyRole")
+	defer transaction.Finish()
 	slog.Debug(fmt.Sprintf("updateNotifyRole executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
 	if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -88,7 +94,7 @@ func UpdateNotifyRole(bot *discordgo.Session, interactionCreate *discordgo.Inter
 	}
 
 	notifyRole := interactionCreate.MessageComponentData().Values[0]
-	err := clients.UpdateCourse(clients.Course{
+	err := clients.UpdateCourse(transaction, clients.Course{
 		CourseID:    interactionCreate.GuildID,
 		NotifyGroup: notifyRole,
 	})
@@ -106,7 +112,7 @@ func UpdateNotifyRole(bot *discordgo.Session, interactionCreate *discordgo.Inter
 		}
 	}
 
-	updatedCourse, err := clients.ReadCourse(interactionCreate.GuildID)
+	updatedCourse, err := clients.ReadCourse(transaction, interactionCreate.GuildID)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error reading updated course: %s", err.Error()))
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{

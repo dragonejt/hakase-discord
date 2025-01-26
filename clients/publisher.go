@@ -1,4 +1,4 @@
-package notifications
+package clients
 
 import (
 	"context"
@@ -33,11 +33,11 @@ func createStreamConnection() any {
 	return js
 }
 
-func publishMessage(subject string, message []byte) error {
+func publishMessage(span *sentry.Span, subject string, message []byte) error {
 	js := PublisherPool.Get().(jetstream.JetStream)
 	defer PublisherPool.Put(js)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(span.Context(), 10*time.Second)
 	defer cancel()
 
 	slog.Debug(fmt.Sprintf("publishing message to subject: %s.%s", settings.STREAM_NAME, subject))
@@ -50,19 +50,19 @@ func publishMessage(subject string, message []byte) error {
 	return nil
 }
 
-func PublishNotification(notification string) {
-	span := sentry.StartSpan(context.TODO(), "publishNotification")
+func PublishNotification(span *sentry.Span, notification string) {
+	span = span.StartChild("publishNotification")
 	defer span.Finish()
 
-	err := publishMessage("notifications", []byte(notification))
+	err := publishMessage(span, "notifications", []byte(notification))
 	if err != nil {
 		slog.Error(err.Error())
 		panic(err)
 	}
 }
 
-func PublishAssignmentNotification(notification AssignmentNotification) {
-	span := sentry.StartSpan(context.TODO(), "publishAssignmentNotification")
+func PublishAssignmentNotification(span *sentry.Span, notification AssignmentNotification) {
+	span = span.StartChild("publishAssignmentNotification")
 	defer span.Finish()
 
 	message, err := json.Marshal(notification)
@@ -70,15 +70,15 @@ func PublishAssignmentNotification(notification AssignmentNotification) {
 		slog.Error(err.Error())
 		panic(err)
 	}
-	err = publishMessage("assignments", message)
+	err = publishMessage(span, "assignments", message)
 	if err != nil {
 		slog.Error(err.Error())
 		panic(err)
 	}
 }
 
-func PublishStudySessionNotification(notification StudySessionNotification) {
-	span := sentry.StartSpan(context.TODO(), "publishStudySessionNotification")
+func PublishStudySessionNotification(span *sentry.Span, notification StudySessionNotification) {
+	span = span.StartChild("publishStudySessionNotification")
 	defer span.Finish()
 
 	message, err := json.Marshal(notification)
@@ -87,7 +87,7 @@ func PublishStudySessionNotification(notification StudySessionNotification) {
 		panic(err)
 	}
 
-	err = publishMessage("study_sessions", message)
+	err = publishMessage(span, "study_sessions", message)
 	if err != nil {
 		slog.Error(err.Error())
 		panic(err)

@@ -1,6 +1,8 @@
-package notifications
+package clients
 
 import "time"
+
+type DiscordSession struct{}
 
 type AssignmentNotification struct {
 	AssignmentID int

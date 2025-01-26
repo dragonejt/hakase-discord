@@ -9,12 +9,13 @@ import (
 	"github.com/araddon/dateparse"
 	"github.com/bwmarrin/discordgo"
 	"github.com/dragonejt/hakase-discord/clients"
-	"github.com/dragonejt/hakase-discord/notifications"
 	"github.com/dragonejt/hakase-discord/views"
 	"github.com/getsentry/sentry-go"
 )
 
 func AddAssignment(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "addAssignmentAction")
+	defer transaction.Finish()
 	slog.Debug(fmt.Sprintf("addAssignment executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
 	if interactionCreate.Member.Permissions&discordgo.PermissionAdministrator == 0 {
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -46,7 +47,7 @@ func AddAssignment(bot *discordgo.Session, interactionCreate *discordgo.Interact
 
 func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 	slog.Info(fmt.Sprintf("addAssignmentSubmit executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
-	transaction := sentry.StartTransaction(context.TODO(), "addAssignment")
+	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "addAssignmentSubmit")
 	defer transaction.Finish()
 
 	err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -88,7 +89,7 @@ func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.In
 		return
 	}
 
-	createdAssignment, err := clients.CreateAssignment(assignment)
+	createdAssignment, err := clients.CreateAssignment(transaction, assignment)
 	if err != nil {
 		_, err := bot.FollowupMessageCreate(interactionCreate.Interaction, false, &discordgo.WebhookParams{
 			Content: err.Error(),
@@ -100,12 +101,12 @@ func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.In
 		return
 	}
 
-	go notifications.PublishAssignmentNotification(notifications.AssignmentNotification{
+	go clients.PublishAssignmentNotification(transaction, clients.AssignmentNotification{
 		AssignmentID: createdAssignment.ID,
 		Before:       time.Hour,
 	})
 
-	go notifications.PublishAssignmentNotification(notifications.AssignmentNotification{
+	go clients.PublishAssignmentNotification(transaction, clients.AssignmentNotification{
 		AssignmentID: createdAssignment.ID,
 		Before:       time.Hour * 24,
 	})

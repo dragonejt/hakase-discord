@@ -52,26 +52,29 @@ func SlashHakase(bot *discordgo.Session, interactionCreate *discordgo.Interactio
 	}
 
 	slog.Info(fmt.Sprintf("/hakase executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
-	transaction := sentry.StartTransaction(context.TODO(), "/hakase")
+	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "/assignments")
 	defer transaction.Finish()
 
 	subcommand, exists := optionMap["cmd"]
 	if !exists {
-		ping(bot, interactionCreate)
+		ping(transaction, interactionCreate)
 	} else {
 		switch subcommand.StringValue() {
 		case "rock-paper-scissors":
-			rockPaperScissors(bot, interactionCreate)
+			rockPaperScissors(transaction, interactionCreate)
 		case "config":
-			config(bot, interactionCreate)
+			config(transaction, interactionCreate)
 		}
 	}
 }
 
-func ping(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-	start := time.Now()
+func ping(span *sentry.Span, interactionCreate *discordgo.InteractionCreate) {
+	span = span.StartChild("/hakase ping")
+	defer span.Finish()
+	bot := span.GetTransaction().Context().Value(clients.DiscordSession{}).(*discordgo.Session)
 
-	_, err := clients.ReadCourse(interactionCreate.GuildID)
+	start := time.Now()
+	_, err := clients.ReadCourse(span, interactionCreate.GuildID)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error pinging backend: %s", err.Error()))
 	}
@@ -88,7 +91,11 @@ func ping(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate
 
 }
 
-func rockPaperScissors(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+func rockPaperScissors(span *sentry.Span, interactionCreate *discordgo.InteractionCreate) {
+	span = span.StartChild("/hakase rockPaperScissors")
+	defer span.Finish()
+	bot := span.GetTransaction().Context().Value(clients.DiscordSession{}).(*discordgo.Session)
+
 	err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
@@ -100,8 +107,12 @@ func rockPaperScissors(bot *discordgo.Session, interactionCreate *discordgo.Inte
 	}
 }
 
-func config(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-	course, err := clients.ReadCourse(interactionCreate.GuildID)
+func config(span *sentry.Span, interactionCreate *discordgo.InteractionCreate) {
+	span = span.StartChild("/hakase config")
+	defer span.Finish()
+	bot := span.GetTransaction().Context().Value(clients.DiscordSession{}).(*discordgo.Session)
+
+	course, err := clients.ReadCourse(span, interactionCreate.GuildID)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error reading course: %s", err.Error()))
 		err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
