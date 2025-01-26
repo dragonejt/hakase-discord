@@ -32,6 +32,8 @@ func ReadCourse(span *sentry.Span, courseID string) (Course, error) {
 	}
 	request.Header.Add("Accept", "application/json")
 	request.Header.Add("Authorization", fmt.Sprintf("Token %s", settings.BACKEND_API_KEY))
+	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
+	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
 	client := span.GetTransaction().Context().Value(DiscordSession{}).(*discordgo.Session).Client
 	response, err := client.Do(request)
@@ -71,6 +73,8 @@ func CreateCourse(span *sentry.Span, course Course) error {
 	request.Header.Add("Accept", "application/json")
 	request.Header.Add("Content-Type", "application/json")
 	request.Header.Add("Authorization", fmt.Sprintf("Token %s", settings.BACKEND_API_KEY))
+	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
+	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
 	client := span.GetTransaction().Context().Value(DiscordSession{}).(*discordgo.Session).Client
 	response, err := client.Do(request)
@@ -110,6 +114,8 @@ func UpdateCourse(span *sentry.Span, course Course) error {
 	request.Header.Add("Accept", "application/json")
 	request.Header.Add("Content-Type", "application/json")
 	request.Header.Add("Authorization", fmt.Sprintf("Token %s", settings.BACKEND_API_KEY))
+	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
+	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
 	client := span.GetTransaction().Context().Value(DiscordSession{}).(*discordgo.Session).Client
 	response, err := client.Do(request)
@@ -142,6 +148,8 @@ func DeleteCourse(span *sentry.Span, courseID string) error {
 		return fmt.Errorf("failed to create API request: %w", err)
 	}
 	request.Header.Add("Authorization", fmt.Sprintf("Token %s", settings.BACKEND_API_KEY))
+	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
+	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
 	client := span.GetTransaction().Context().Value(DiscordSession{}).(*discordgo.Session).Client
 	response, err := client.Do(request)
