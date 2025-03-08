@@ -37,7 +37,8 @@ func ReadAssignment(span *sentry.Span, assignmentID string) (Assignment, error) 
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
-	response, err := http.DefaultClient.Do(request)
+	client := span.GetTransaction().Context().Value(DiscordSession{}).(*discordgo.Session).Client
+	response, err := client.Do(request)
 	if err != nil {
 		return assignment, fmt.Errorf("failed to execute API request: %w", err)
 	}

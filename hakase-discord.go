@@ -20,11 +20,11 @@ func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	if !settings.DEBUG {
 		err := sentry.Init(sentry.ClientOptions{
-			Dsn:                "https://701b4c4b27e3aeb9ab991b282df7c705@o4507124907638784.ingest.us.sentry.io/4508476074360832",
-			EnableTracing:      true,
-			TracesSampleRate:   1,
-			ProfilesSampleRate: 1,
-			Environment:        settings.ENV,
+			Dsn:              "https://701b4c4b27e3aeb9ab991b282df7c705@o4507124907638784.ingest.us.sentry.io/4508476074360832",
+			EnableTracing:    true,
+			SampleRate:       1,
+			TracesSampleRate: 1,
+			Environment:      settings.ENV,
 		})
 		if err != nil {
 			slog.Warn(fmt.Sprintf("error initiating sentry: %s", err))
