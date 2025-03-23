@@ -10,7 +10,7 @@ import (
 	"github.com/getsentry/sentry-go"
 )
 
-func GuildCreate(bot *discordgo.Session, guildCreate *discordgo.GuildCreate) {
+func GuildCreate(bot *discordgo.Session, guildCreate *discordgo.GuildCreate, hakaseClient clients.HakaseClient) {
 	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "guildCreate")
 	defer transaction.Finish()
 	slog.Info(fmt.Sprintf("added to guild: %s (%s)", guildCreate.Guild.Name, guildCreate.Guild.ID))
@@ -18,7 +18,7 @@ func GuildCreate(bot *discordgo.Session, guildCreate *discordgo.GuildCreate) {
 	course := clients.Course{
 		CourseID: guildCreate.Guild.ID,
 	}
-	err := clients.CreateCourse(transaction, course)
+	err := hakaseClient.CreateCourse(transaction, course)
 	if err != nil {
 		slog.Error(fmt.Sprintf("failed to create course: %s", err))
 	}
@@ -29,12 +29,12 @@ func GuildCreate(bot *discordgo.Session, guildCreate *discordgo.GuildCreate) {
 	}
 }
 
-func GuildDelete(bot *discordgo.Session, guildDelete *discordgo.GuildDelete) {
+func GuildDelete(bot *discordgo.Session, guildDelete *discordgo.GuildDelete, hakaseClient clients.HakaseClient) {
 	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "guildDelete")
 	defer transaction.Finish()
 	slog.Info(fmt.Sprintf("removed from guild: %s (%s)", guildDelete.Guild.Name, guildDelete.Guild.ID))
 
-	err := clients.DeleteCourse(transaction, guildDelete.Guild.ID)
+	err := hakaseClient.DeleteCourse(transaction, guildDelete.Guild.ID)
 	if err != nil {
 		slog.Error(fmt.Sprintf("failed to delete course: %s", err))
 	}

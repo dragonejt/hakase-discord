@@ -45,7 +45,7 @@ func AddAssignment(bot *discordgo.Session, interactionCreate *discordgo.Interact
 
 }
 
-func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
 	slog.Info(fmt.Sprintf("addAssignmentSubmit executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
 	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "addAssignmentSubmit")
 	defer transaction.Finish()
@@ -89,7 +89,7 @@ func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.In
 		return
 	}
 
-	createdAssignment, err := clients.CreateAssignment(transaction, assignment)
+	createdAssignment, err := hakaseClient.CreateAssignment(transaction, assignment)
 	if err != nil {
 		_, err := bot.FollowupMessageCreate(interactionCreate.Interaction, false, &discordgo.WebhookParams{
 			Content: err.Error(),

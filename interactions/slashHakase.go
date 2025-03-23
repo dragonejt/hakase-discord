@@ -45,7 +45,7 @@ var rockPaperScissorsGIFS = []string{
 	"https://tenor.com/view/nichijou-hakase-rps-rock-paper-scissors-nano-gif-11850067363499322337",
 }
 
-func SlashHakase(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+func SlashHakase(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
 	optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(interactionCreate.ApplicationCommandData().Options))
 	for _, opt := range interactionCreate.ApplicationCommandData().Options {
 		optionMap[opt.Name] = opt
@@ -57,24 +57,24 @@ func SlashHakase(bot *discordgo.Session, interactionCreate *discordgo.Interactio
 
 	subcommand, exists := optionMap["cmd"]
 	if !exists {
-		ping(transaction, interactionCreate)
+		ping(transaction, interactionCreate, hakaseClient)
 	} else {
 		switch subcommand.StringValue() {
 		case "rock-paper-scissors":
 			rockPaperScissors(transaction, interactionCreate)
 		case "config":
-			config(transaction, interactionCreate)
+			config(transaction, interactionCreate, hakaseClient)
 		}
 	}
 }
 
-func ping(span *sentry.Span, interactionCreate *discordgo.InteractionCreate) {
+func ping(span *sentry.Span, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
 	span = span.StartChild("/hakase ping")
 	defer span.Finish()
 	bot := span.GetTransaction().Context().Value(clients.DiscordSession{}).(*discordgo.Session)
 
 	start := time.Now()
-	_, err := clients.ReadCourse(span, interactionCreate.GuildID)
+	_, err := hakaseClient.ReadCourse(span, interactionCreate.GuildID)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error pinging backend: %s", err.Error()))
 	}
@@ -107,12 +107,12 @@ func rockPaperScissors(span *sentry.Span, interactionCreate *discordgo.Interacti
 	}
 }
 
-func config(span *sentry.Span, interactionCreate *discordgo.InteractionCreate) {
+func config(span *sentry.Span, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
 	span = span.StartChild("/hakase config")
 	defer span.Finish()
 	bot := span.GetTransaction().Context().Value(clients.DiscordSession{}).(*discordgo.Session)
 
-	course, err := clients.ReadCourse(span, interactionCreate.GuildID)
+	course, err := hakaseClient.ReadCourse(span, interactionCreate.GuildID)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error reading course: %s", err.Error()))
 		err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{

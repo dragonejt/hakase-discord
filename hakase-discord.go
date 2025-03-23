@@ -41,6 +41,12 @@ func main() {
 	}
 	bot.StateEnabled = true
 
+	backend := clients.BackendClient{
+		URL:         settings.BACKEND_URL,
+		API_KEY:     settings.BACKEND_API_KEY,
+		HTTP_CLIENT: bot.Client,
+	}
+
 	stopListener := make(chan bool, 1)
 	go clients.ListenToStream(bot, stopListener)
 
@@ -53,9 +59,15 @@ func main() {
 
 	slog.Info("registering event handlers")
 	bot.AddHandler(events.Ready)
-	bot.AddHandler(events.GuildCreate)
-	bot.AddHandler(events.GuildDelete)
-	bot.AddHandler(events.InteractionCreate)
+	bot.AddHandler(func(bot *discordgo.Session, guildCreate *discordgo.GuildCreate) {
+		events.GuildCreate(bot, guildCreate, &backend)
+	})
+	bot.AddHandler(func(bot *discordgo.Session, guildDelete *discordgo.GuildDelete) {
+		events.GuildDelete(bot, guildDelete, &backend)
+	})
+	bot.AddHandler(func(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+		events.InteractionCreate(bot, interactionCreate, &backend)
+	})
 
 	slog.Info("registering interactions")
 	interactions := []*discordgo.ApplicationCommand{&interactions.AssignmentsCommand, &interactions.HakaseCommand}

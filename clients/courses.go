@@ -7,8 +7,6 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/bwmarrin/discordgo"
-	"github.com/dragonejt/hakase-discord/settings"
 	"github.com/getsentry/sentry-go"
 )
 
@@ -20,23 +18,22 @@ type Course struct {
 	NotifyGroup   string `json:"notify_group,omitempty"`
 }
 
-func ReadCourse(span *sentry.Span, courseID string) (Course, error) {
+func (backend *BackendClient) ReadCourse(span *sentry.Span, courseID string) (Course, error) {
 	span = span.StartChild("readCourse")
 	defer span.Finish()
 
 	course := Course{}
 
-	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/courses?course_id=%s", settings.BACKEND_URL, courseID), nil)
+	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/courses?course_id=%s", backend.URL, courseID), nil)
 	if err != nil {
 		return course, fmt.Errorf("failed to create API request: %w", err)
 	}
 	request.Header.Add("Accept", "application/json")
-	request.Header.Add("Authorization", fmt.Sprintf("Token %s", settings.BACKEND_API_KEY))
+	request.Header.Add("Authorization", fmt.Sprintf("Token %s", backend.API_KEY))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
-	client := span.GetTransaction().Context().Value(DiscordSession{}).(*discordgo.Session).Client
-	response, err := client.Do(request)
+	response, err := backend.HTTP_CLIENT.Do(request)
 	if err != nil {
 		return course, fmt.Errorf("failed to execute API request: %w", err)
 	}
@@ -57,7 +54,7 @@ func ReadCourse(span *sentry.Span, courseID string) (Course, error) {
 	return course, nil
 }
 
-func CreateCourse(span *sentry.Span, course Course) error {
+func (backend *BackendClient) CreateCourse(span *sentry.Span, course Course) error {
 	span = span.StartChild("createCourse")
 	defer span.Finish()
 
@@ -66,18 +63,17 @@ func CreateCourse(span *sentry.Span, course Course) error {
 		return fmt.Errorf("failed to marshal course: %w", err)
 	}
 
-	request, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/courses", settings.BACKEND_URL), bytes.NewReader(jsonBody))
+	request, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/courses", backend.URL), bytes.NewReader(jsonBody))
 	if err != nil {
 		return fmt.Errorf("failed to create API request: %w", err)
 	}
 	request.Header.Add("Accept", "application/json")
 	request.Header.Add("Content-Type", "application/json")
-	request.Header.Add("Authorization", fmt.Sprintf("Token %s", settings.BACKEND_API_KEY))
+	request.Header.Add("Authorization", fmt.Sprintf("Token %s", backend.API_KEY))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
-	client := span.GetTransaction().Context().Value(DiscordSession{}).(*discordgo.Session).Client
-	response, err := client.Do(request)
+	response, err := backend.HTTP_CLIENT.Do(request)
 	if err != nil {
 		return fmt.Errorf("failed to execute API request: %w", err)
 	}
@@ -98,7 +94,7 @@ func CreateCourse(span *sentry.Span, course Course) error {
 	return nil
 }
 
-func UpdateCourse(span *sentry.Span, course Course) error {
+func (backend *BackendClient) UpdateCourse(span *sentry.Span, course Course) error {
 	span = span.StartChild("updateCourse")
 	defer span.Finish()
 
@@ -107,18 +103,17 @@ func UpdateCourse(span *sentry.Span, course Course) error {
 		return fmt.Errorf("failed to marshal course: %w", err)
 	}
 
-	request, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/courses", settings.BACKEND_URL), bytes.NewReader(jsonBody))
+	request, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/courses", backend.URL), bytes.NewReader(jsonBody))
 	if err != nil {
 		return fmt.Errorf("failed to create API request: %w", err)
 	}
 	request.Header.Add("Accept", "application/json")
 	request.Header.Add("Content-Type", "application/json")
-	request.Header.Add("Authorization", fmt.Sprintf("Token %s", settings.BACKEND_API_KEY))
+	request.Header.Add("Authorization", fmt.Sprintf("Token %s", backend.API_KEY))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
-	client := span.GetTransaction().Context().Value(DiscordSession{}).(*discordgo.Session).Client
-	response, err := client.Do(request)
+	response, err := backend.HTTP_CLIENT.Do(request)
 	if err != nil {
 		return fmt.Errorf("failed to execute API request: %w", err)
 	}
@@ -139,20 +134,19 @@ func UpdateCourse(span *sentry.Span, course Course) error {
 	return nil
 }
 
-func DeleteCourse(span *sentry.Span, courseID string) error {
+func (backend *BackendClient) DeleteCourse(span *sentry.Span, courseID string) error {
 	span = span.StartChild("deleteCourse")
 	defer span.Finish()
 
-	request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/courses?course_id=%s", settings.BACKEND_URL, courseID), nil)
+	request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/courses?course_id=%s", backend.URL, courseID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create API request: %w", err)
 	}
-	request.Header.Add("Authorization", fmt.Sprintf("Token %s", settings.BACKEND_API_KEY))
+	request.Header.Add("Authorization", fmt.Sprintf("Token %s", backend.API_KEY))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
-	client := span.GetTransaction().Context().Value(DiscordSession{}).(*discordgo.Session).Client
-	response, err := client.Do(request)
+	response, err := backend.HTTP_CLIENT.Do(request)
 	if err != nil {
 		return fmt.Errorf("failed to execute API request: %w", err)
 	}

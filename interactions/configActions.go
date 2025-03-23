@@ -11,7 +11,7 @@ import (
 	"github.com/getsentry/sentry-go"
 )
 
-func UpdateNotifyChannel(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+func UpdateNotifyChannel(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
 	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "updateNotifyChannel")
 	defer transaction.Finish()
 	slog.Debug(fmt.Sprintf("updateNotifyChannel executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
@@ -30,7 +30,7 @@ func UpdateNotifyChannel(bot *discordgo.Session, interactionCreate *discordgo.In
 	}
 
 	notifyChannel := interactionCreate.MessageComponentData().Values[0]
-	err := clients.UpdateCourse(transaction, clients.Course{
+	err := hakaseClient.UpdateCourse(transaction, clients.Course{
 		CourseID:      interactionCreate.GuildID,
 		NotifyChannel: notifyChannel,
 	})
@@ -48,7 +48,7 @@ func UpdateNotifyChannel(bot *discordgo.Session, interactionCreate *discordgo.In
 		}
 	}
 
-	updatedCourse, err := clients.ReadCourse(transaction, interactionCreate.GuildID)
+	updatedCourse, err := hakaseClient.ReadCourse(transaction, interactionCreate.GuildID)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error reading updated course: %s", err.Error()))
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -75,7 +75,7 @@ func UpdateNotifyChannel(bot *discordgo.Session, interactionCreate *discordgo.In
 	}
 }
 
-func UpdateNotifyRole(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+func UpdateNotifyRole(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
 	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "updateNotifyRole")
 	defer transaction.Finish()
 	slog.Debug(fmt.Sprintf("updateNotifyRole executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
@@ -94,7 +94,7 @@ func UpdateNotifyRole(bot *discordgo.Session, interactionCreate *discordgo.Inter
 	}
 
 	notifyRole := interactionCreate.MessageComponentData().Values[0]
-	err := clients.UpdateCourse(transaction, clients.Course{
+	err := hakaseClient.UpdateCourse(transaction, clients.Course{
 		CourseID:    interactionCreate.GuildID,
 		NotifyGroup: notifyRole,
 	})
@@ -112,7 +112,7 @@ func UpdateNotifyRole(bot *discordgo.Session, interactionCreate *discordgo.Inter
 		}
 	}
 
-	updatedCourse, err := clients.ReadCourse(transaction, interactionCreate.GuildID)
+	updatedCourse, err := hakaseClient.ReadCourse(transaction, interactionCreate.GuildID)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error reading updated course: %s", err.Error()))
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{

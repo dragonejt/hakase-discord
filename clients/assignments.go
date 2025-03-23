@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
-	"github.com/dragonejt/hakase-discord/settings"
 	"github.com/getsentry/sentry-go"
 )
 
@@ -22,23 +20,22 @@ type Assignment struct {
 	Link     string    `json:"link,omitempty"`
 }
 
-func ReadAssignment(span *sentry.Span, assignmentID string) (Assignment, error) {
+func (backend *BackendClient) ReadAssignment(span *sentry.Span, assignmentID string) (Assignment, error) {
 	span = span.StartChild("readAssignment")
 	defer span.Finish()
 
 	assignment := Assignment{}
 
-	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/assignments?id=%s", settings.BACKEND_URL, assignmentID), nil)
+	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/assignments?id=%s", backend.URL, assignmentID), nil)
 	if err != nil {
 		return assignment, fmt.Errorf("failed to create API request: %w", err)
 	}
 	request.Header.Add("Accept", "application/json")
-	request.Header.Add("Authorization", fmt.Sprintf("Token %s", settings.BACKEND_API_KEY))
+	request.Header.Add("Authorization", fmt.Sprintf("Token %s", backend.API_KEY))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
-	client := span.GetTransaction().Context().Value(DiscordSession{}).(*discordgo.Session).Client
-	response, err := client.Do(request)
+	response, err := backend.HTTP_CLIENT.Do(request)
 	if err != nil {
 		return assignment, fmt.Errorf("failed to execute API request: %w", err)
 	}
@@ -59,23 +56,22 @@ func ReadAssignment(span *sentry.Span, assignmentID string) (Assignment, error) 
 	return assignment, nil
 }
 
-func ListAssignments(span *sentry.Span, courseID string) ([]Assignment, error) {
+func (backend *BackendClient) ListAssignments(span *sentry.Span, courseID string) ([]Assignment, error) {
 	span = span.StartChild("listAssignments")
 	defer span.Finish()
 
 	assignments := []Assignment{}
 
-	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/assignments?course_id=%s", settings.BACKEND_URL, courseID), nil)
+	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/assignments?course_id=%s", backend.URL, courseID), nil)
 	if err != nil {
 		return assignments, fmt.Errorf("failed to create API request: %w", err)
 	}
 	request.Header.Add("Accept", "application/json")
-	request.Header.Add("Authorization", fmt.Sprintf("Token %s", settings.BACKEND_API_KEY))
+	request.Header.Add("Authorization", fmt.Sprintf("Token %s", backend.API_KEY))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
-	client := span.GetTransaction().Context().Value(DiscordSession{}).(*discordgo.Session).Client
-	response, err := client.Do(request)
+	response, err := backend.HTTP_CLIENT.Do(request)
 	if err != nil {
 		return assignments, fmt.Errorf("failed to execute API request: %w", err)
 	}
@@ -96,7 +92,7 @@ func ListAssignments(span *sentry.Span, courseID string) ([]Assignment, error) {
 	return assignments, nil
 }
 
-func CreateAssignment(span *sentry.Span, assignment Assignment) (Assignment, error) {
+func (backend *BackendClient) CreateAssignment(span *sentry.Span, assignment Assignment) (Assignment, error) {
 	span = span.StartChild("createAssignment")
 	defer span.Finish()
 
@@ -105,18 +101,17 @@ func CreateAssignment(span *sentry.Span, assignment Assignment) (Assignment, err
 		return Assignment{}, fmt.Errorf("failed to marshal assignment: %w", err)
 	}
 
-	request, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/assignments", settings.BACKEND_URL), bytes.NewReader(jsonBody))
+	request, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/assignments", backend.URL), bytes.NewReader(jsonBody))
 	if err != nil {
 		return Assignment{}, fmt.Errorf("failed to create API request: %w", err)
 	}
 	request.Header.Add("Accept", "application/json")
 	request.Header.Add("Content-Type", "application/json")
-	request.Header.Add("Authorization", fmt.Sprintf("Token %s", settings.BACKEND_API_KEY))
+	request.Header.Add("Authorization", fmt.Sprintf("Token %s", backend.API_KEY))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
-	client := span.GetTransaction().Context().Value(DiscordSession{}).(*discordgo.Session).Client
-	response, err := client.Do(request)
+	response, err := backend.HTTP_CLIENT.Do(request)
 	if err != nil {
 		return Assignment{}, fmt.Errorf("failed to execute API request: %w", err)
 	}
@@ -137,7 +132,7 @@ func CreateAssignment(span *sentry.Span, assignment Assignment) (Assignment, err
 	return assignment, nil
 }
 
-func UpdateAssignment(span *sentry.Span, assignment Assignment) (Assignment, error) {
+func (backend *BackendClient) UpdateAssignment(span *sentry.Span, assignment Assignment) (Assignment, error) {
 	span = span.StartChild("updateAssignment")
 	defer span.Finish()
 
@@ -146,18 +141,17 @@ func UpdateAssignment(span *sentry.Span, assignment Assignment) (Assignment, err
 		return Assignment{}, fmt.Errorf("failed to marshal assignment: %w", err)
 	}
 
-	request, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/assignments", settings.BACKEND_URL), bytes.NewReader(jsonBody))
+	request, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/assignments", backend.URL), bytes.NewReader(jsonBody))
 	if err != nil {
 		return Assignment{}, fmt.Errorf("failed to create API request: %w", err)
 	}
 	request.Header.Add("Accept", "application/json")
 	request.Header.Add("Content-Type", "application/json")
-	request.Header.Add("Authorization", fmt.Sprintf("Token %s", settings.BACKEND_API_KEY))
+	request.Header.Add("Authorization", fmt.Sprintf("Token %s", backend.API_KEY))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
-	client := span.GetTransaction().Context().Value(DiscordSession{}).(*discordgo.Session).Client
-	response, err := client.Do(request)
+	response, err := backend.HTTP_CLIENT.Do(request)
 	if err != nil {
 		return Assignment{}, fmt.Errorf("failed to execute API request: %w", err)
 	}
@@ -178,20 +172,19 @@ func UpdateAssignment(span *sentry.Span, assignment Assignment) (Assignment, err
 	return assignment, nil
 }
 
-func DeleteAssignment(span *sentry.Span, assignmentID string) error {
+func (backend *BackendClient) DeleteAssignment(span *sentry.Span, assignmentID string) error {
 	span = span.StartChild("deleteAssignment")
 	defer span.Finish()
 
-	request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/assignments?id=%s", settings.BACKEND_URL, assignmentID), nil)
+	request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/assignments?id=%s", backend.URL, assignmentID), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create API request: %w", err)
 	}
-	request.Header.Add("Authorization", fmt.Sprintf("Token %s", settings.BACKEND_API_KEY))
+	request.Header.Add("Authorization", fmt.Sprintf("Token %s", backend.API_KEY))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
-	client := span.GetTransaction().Context().Value(DiscordSession{}).(*discordgo.Session).Client
-	response, err := client.Do(request)
+	response, err := backend.HTTP_CLIENT.Do(request)
 	if err != nil {
 		return fmt.Errorf("failed to execute API request: %w", err)
 	}

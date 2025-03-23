@@ -24,7 +24,7 @@ var AssignmentsCommand = discordgo.ApplicationCommand{
 	},
 }
 
-func SlashAssignments(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
+func SlashAssignments(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
 	optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(interactionCreate.ApplicationCommandData().Options))
 	for _, opt := range interactionCreate.ApplicationCommandData().Options {
 		optionMap[opt.Name] = opt
@@ -36,19 +36,19 @@ func SlashAssignments(bot *discordgo.Session, interactionCreate *discordgo.Inter
 
 	assignmentID, exists := optionMap["id"]
 	if exists {
-		getAssignment(transaction, interactionCreate, fmt.Sprint(assignmentID.IntValue()))
+		getAssignment(transaction, interactionCreate, hakaseClient, fmt.Sprint(assignmentID.IntValue()))
 
 	} else {
-		listAssignments(transaction, interactionCreate)
+		listAssignments(transaction, interactionCreate, hakaseClient)
 	}
 
 }
 
-func getAssignment(span *sentry.Span, interactionCreate *discordgo.InteractionCreate, assignmentID string) {
+func getAssignment(span *sentry.Span, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient, assignmentID string) {
 	span = span.StartChild("/assignments getAssignment")
 	defer span.Finish()
 	bot := span.GetTransaction().Context().Value(clients.DiscordSession{}).(*discordgo.Session)
-	assignment, err := clients.ReadAssignment(span, assignmentID)
+	assignment, err := hakaseClient.ReadAssignment(span, assignmentID)
 
 	if err != nil {
 		err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -74,11 +74,11 @@ func getAssignment(span *sentry.Span, interactionCreate *discordgo.InteractionCr
 	}
 }
 
-func listAssignments(span *sentry.Span, interactionCreate *discordgo.InteractionCreate) {
+func listAssignments(span *sentry.Span, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
 	span = span.StartChild("/assignments listAssignments")
 	defer span.Finish()
 	bot := span.GetTransaction().Context().Value(clients.DiscordSession{}).(*discordgo.Session)
-	assignments, err := clients.ListAssignments(span, interactionCreate.GuildID)
+	assignments, err := hakaseClient.ListAssignments(span, interactionCreate.GuildID)
 
 	if err != nil {
 		err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
