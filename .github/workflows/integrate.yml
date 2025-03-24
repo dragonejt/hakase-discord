@@ -28,7 +28,7 @@ jobs:
       run: go build
 
     - name: Run Tests
-      run: go test -coverprofile=coverage.txt
+      run: go test ./... -coverpkg=./... -coverprofile=coverage.txt
 
     - name: Lint Project and Check Formatting
       uses: golangci/golangci-lint-action@v6
