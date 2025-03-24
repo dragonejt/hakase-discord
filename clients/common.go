@@ -21,7 +21,8 @@ type HakaseClient interface {
 	DeleteAssignment(span *sentry.Span, assignmentID string) error
 }
 
-type BackendClient struct { // implements HakaseClient
+type BackendClient struct {
+	HakaseClient
 	URL         string
 	API_KEY     string
 	HTTP_CLIENT *http.Client
