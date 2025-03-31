@@ -74,7 +74,7 @@ func ping(span *sentry.Span, interactionCreate *discordgo.InteractionCreate, hak
 	bot := span.GetTransaction().Context().Value(clients.DiscordSession{}).(*discordgo.Session)
 
 	start := time.Now()
-	_, err := hakaseClient.ReadCourse(span, interactionCreate.GuildID)
+	err := hakaseClient.HeadCourse(span, interactionCreate.GuildID)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error pinging backend: %s", err.Error()))
 	}

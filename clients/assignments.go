@@ -56,6 +56,30 @@ func (backend *BackendClient) ReadAssignment(span *sentry.Span, assignmentID str
 	return assignment, nil
 }
 
+func (backend *BackendClient) HeadAssignment(span *sentry.Span, assignmentID string) error {
+	span = span.StartChild("headAssignment")
+	defer span.Finish()
+
+	request, err := http.NewRequest(http.MethodHead, fmt.Sprintf("%s/assignments?id=%s", backend.URL, assignmentID), nil)
+	if err != nil {
+		return fmt.Errorf("failed to create API request: %w", err)
+	}
+	request.Header.Add("Accept", "application/json")
+	request.Header.Add("Authorization", fmt.Sprintf("Token %s", backend.API_KEY))
+	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
+	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
+
+	response, err := backend.HTTP_CLIENT.Do(request)
+	if err != nil {
+		return fmt.Errorf("failed to execute API request: %w", err)
+	}
+	if response.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed status code API response: %d", response.StatusCode)
+	}
+
+	return nil
+}
+
 func (backend *BackendClient) ListAssignments(span *sentry.Span, courseID string) ([]Assignment, error) {
 	span = span.StartChild("listAssignments")
 	defer span.Finish()

@@ -54,6 +54,30 @@ func (backend *BackendClient) ReadCourse(span *sentry.Span, courseID string) (Co
 	return course, nil
 }
 
+func (backend *BackendClient) HeadCourse(span *sentry.Span, courseID string) error {
+	span = span.StartChild("headCourse")
+	defer span.Finish()
+
+	request, err := http.NewRequest(http.MethodHead, fmt.Sprintf("%s/courses?course_id=%s", backend.URL, courseID), nil)
+	if err != nil {
+		return fmt.Errorf("failed to create API request: %w", err)
+	}
+	request.Header.Add("Accept", "application/json")
+	request.Header.Add("Authorization", fmt.Sprintf("Token %s", backend.API_KEY))
+	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
+	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
+
+	response, err := backend.HTTP_CLIENT.Do(request)
+	if err != nil {
+		return fmt.Errorf("failed to execute API request: %w", err)
+	}
+	if response.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed status code API response: %d", response.StatusCode)
+	}
+
+	return nil
+}
+
 func (backend *BackendClient) CreateCourse(span *sentry.Span, course Course) error {
 	span = span.StartChild("createCourse")
 	defer span.Finish()

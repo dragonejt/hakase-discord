@@ -10,11 +10,13 @@ import (
 type HakaseClient interface {
 	// Course APIs
 	ReadCourse(span *sentry.Span, courseID string) (Course, error)
+	HeadCourse(span *sentry.Span, courseID string) error
 	CreateCourse(span *sentry.Span, course Course) error
 	UpdateCourse(span *sentry.Span, course Course) error
 	DeleteCourse(span *sentry.Span, courseID string) error
 	// Assignment APIs
 	ReadAssignment(span *sentry.Span, assignmentID string) (Assignment, error)
+	HeadAssignment(span *sentry.Span, assignmentID string) error
 	ListAssignments(span *sentry.Span, courseID string) ([]Assignment, error)
 	CreateAssignment(span *sentry.Span, assignment Assignment) (Assignment, error)
 	UpdateAssignment(span *sentry.Span, assignment Assignment) (Assignment, error)
