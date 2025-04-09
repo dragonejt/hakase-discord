@@ -30,8 +30,8 @@ func (backend *BackendClient) ReadAssignment(span *sentry.Span, assignmentID str
 	if err != nil {
 		return assignment, fmt.Errorf("failed to create API request: %w", err)
 	}
-	request.Header.Add("Accept", "application/json")
-	request.Header.Add("Authorization", fmt.Sprintf("Token %s", backend.API_KEY))
+	request.Header.Add("accept", "application/json")
+	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
@@ -64,8 +64,8 @@ func (backend *BackendClient) HeadAssignment(span *sentry.Span, assignmentID str
 	if err != nil {
 		return fmt.Errorf("failed to create API request: %w", err)
 	}
-	request.Header.Add("Accept", "application/json")
-	request.Header.Add("Authorization", fmt.Sprintf("Token %s", backend.API_KEY))
+	request.Header.Add("accept", "application/json")
+	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
@@ -90,8 +90,8 @@ func (backend *BackendClient) ListAssignments(span *sentry.Span, courseID string
 	if err != nil {
 		return assignments, fmt.Errorf("failed to create API request: %w", err)
 	}
-	request.Header.Add("Accept", "application/json")
-	request.Header.Add("Authorization", fmt.Sprintf("Token %s", backend.API_KEY))
+	request.Header.Add("accept", "application/json")
+	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
@@ -129,9 +129,9 @@ func (backend *BackendClient) CreateAssignment(span *sentry.Span, assignment Ass
 	if err != nil {
 		return Assignment{}, fmt.Errorf("failed to create API request: %w", err)
 	}
-	request.Header.Add("Accept", "application/json")
-	request.Header.Add("Content-Type", "application/json")
-	request.Header.Add("Authorization", fmt.Sprintf("Token %s", backend.API_KEY))
+	request.Header.Add("accept", "application/json")
+	request.Header.Add("content-type", "application/json")
+	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
@@ -169,9 +169,9 @@ func (backend *BackendClient) UpdateAssignment(span *sentry.Span, assignment Ass
 	if err != nil {
 		return Assignment{}, fmt.Errorf("failed to create API request: %w", err)
 	}
-	request.Header.Add("Accept", "application/json")
-	request.Header.Add("Content-Type", "application/json")
-	request.Header.Add("Authorization", fmt.Sprintf("Token %s", backend.API_KEY))
+	request.Header.Add("accept", "application/json")
+	request.Header.Add("content-type", "application/json")
+	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
@@ -204,7 +204,7 @@ func (backend *BackendClient) DeleteAssignment(span *sentry.Span, assignmentID s
 	if err != nil {
 		return fmt.Errorf("failed to create API request: %w", err)
 	}
-	request.Header.Add("Authorization", fmt.Sprintf("Token %s", backend.API_KEY))
+	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
