@@ -25,14 +25,14 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set Docker Tag
-        run: echo "DATE_STAMP=$(date +%s)" > "$GITHUB_ENV"
+        run: echo "GIT_REV=$(git rev-parse --short HEAD)" > "$GITHUB_ENV"
 
       - name: Build and Push Docker Image
         uses: iloveitaly/github-action-nixpacks@main
         with:
           push: true
           tags: |
-            ${{ env.IMAGE_NAME }}:${{ env.DATE_STAMP }}
+            ${{ env.IMAGE_NAME }}:${{ env.GIT_REV }}
             ${{ env.IMAGE_NAME }}:latest
 
       - name: Push to Dokku
@@ -40,7 +40,7 @@ jobs:
         with:
           git_remote_url: ${{ secrets.GIT_REMOTE_URL }}
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          deploy_docker_image: ${{ env.IMAGE_NAME }}:${{ env.DATE_STAMP }}
+          deploy_docker_image: ${{ env.IMAGE_NAME }}:${{ env.GIT_REV }}
 
       - name: Create Sentry Release
         uses: getsentry/action-release@v1
