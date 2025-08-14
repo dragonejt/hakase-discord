@@ -123,7 +123,7 @@ func (backend *BackendClient) CreateAssignment(span *sentry.Span, assignment Ass
 
 	jsonBody, err := json.Marshal(assignment)
 	if err != nil {
-		return Assignment{}, stacktrace.Propagate(err, "failed to marshal assignment: %w")
+		return Assignment{}, stacktrace.Propagate(err, "failed to marshal assignment")
 	}
 
 	request, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/assignments", backend.URL), bytes.NewReader(jsonBody))
@@ -163,7 +163,7 @@ func (backend *BackendClient) UpdateAssignment(span *sentry.Span, assignment Ass
 
 	jsonBody, err := json.Marshal(assignment)
 	if err != nil {
-		return Assignment{}, stacktrace.Propagate(err, "failed to marshal assignment: %w")
+		return Assignment{}, stacktrace.Propagate(err, "failed to marshal assignment")
 	}
 
 	request, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/assignments", backend.URL), bytes.NewReader(jsonBody))

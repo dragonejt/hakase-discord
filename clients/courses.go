@@ -85,7 +85,7 @@ func (backend *BackendClient) CreateCourse(span *sentry.Span, course Course) err
 
 	jsonBody, err := json.Marshal(course)
 	if err != nil {
-		return stacktrace.Propagate(err, "failed to marshal course: %w")
+		return stacktrace.Propagate(err, "failed to marshal course")
 	}
 
 	request, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/courses", backend.URL), bytes.NewReader(jsonBody))
@@ -125,7 +125,7 @@ func (backend *BackendClient) UpdateCourse(span *sentry.Span, course Course) err
 
 	jsonBody, err := json.Marshal(course)
 	if err != nil {
-		return stacktrace.Propagate(err, "failed to marshal course: %w")
+		return stacktrace.Propagate(err, "failed to marshal course")
 	}
 
 	request, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/courses", backend.URL), bytes.NewReader(jsonBody))
