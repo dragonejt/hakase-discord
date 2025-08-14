@@ -17,7 +17,7 @@ func GuildCreate(bot *discordgo.Session, guildCreate *discordgo.GuildCreate, hak
 	slog.Info(fmt.Sprintf("added to guild: %s (%s)", guildCreate.Name, guildCreate.ID))
 
 	course := clients.Course{
-		CourseID: guildCreate.Guild.ID,
+		CourseID: guildCreate.ID,
 	}
 	err := hakaseClient.CreateCourse(transaction, course)
 	if err != nil {
