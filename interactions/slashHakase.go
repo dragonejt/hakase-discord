@@ -11,6 +11,7 @@ import (
 	"github.com/dragonejt/hakase-discord/clients"
 	"github.com/dragonejt/hakase-discord/views"
 	"github.com/getsentry/sentry-go"
+	"github.com/palantir/stacktrace"
 )
 
 var HakaseCommand = discordgo.ApplicationCommand{
@@ -76,7 +77,7 @@ func ping(span *sentry.Span, interactionCreate *discordgo.InteractionCreate, hak
 	start := time.Now()
 	err := hakaseClient.HeadCourse(span, interactionCreate.GuildID)
 	if err != nil {
-		slog.Error(fmt.Sprintf("error pinging backend: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "error pinging backend").Error())
 	}
 
 	err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -86,7 +87,7 @@ func ping(span *sentry.Span, interactionCreate *discordgo.InteractionCreate, hak
 		},
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 	}
 
 }
@@ -103,7 +104,7 @@ func rockPaperScissors(span *sentry.Span, interactionCreate *discordgo.Interacti
 		},
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 	}
 }
 
@@ -114,7 +115,7 @@ func config(span *sentry.Span, interactionCreate *discordgo.InteractionCreate, h
 
 	course, err := hakaseClient.ReadCourse(span, interactionCreate.GuildID)
 	if err != nil {
-		slog.Error(fmt.Sprintf("error reading course: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "error reading course").Error())
 		err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
@@ -122,7 +123,7 @@ func config(span *sentry.Span, interactionCreate *discordgo.InteractionCreate, h
 			},
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 		}
 	}
 
@@ -134,6 +135,6 @@ func config(span *sentry.Span, interactionCreate *discordgo.InteractionCreate, h
 		},
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 	}
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/dragonejt/hakase-discord/clients"
 	"github.com/getsentry/sentry-go"
+	"github.com/palantir/stacktrace"
 )
 
 func GuildCreate(bot *discordgo.Session, guildCreate *discordgo.GuildCreate, hakaseClient clients.HakaseClient) {
@@ -20,12 +21,12 @@ func GuildCreate(bot *discordgo.Session, guildCreate *discordgo.GuildCreate, hak
 	}
 	err := hakaseClient.CreateCourse(transaction, course)
 	if err != nil {
-		slog.Error(fmt.Sprintf("failed to create course: %s", err))
+		slog.Error(stacktrace.Propagate(err, "failed to create course").Error())
 	}
 
 	err = bot.UpdateCustomStatus(fmt.Sprintf("assisting %d classes", len(bot.State.Guilds)))
 	if err != nil {
-		slog.Error(fmt.Sprintf("failed to update status: %s", err))
+		slog.Error(stacktrace.Propagate(err, "failed to update status").Error())
 	}
 }
 
@@ -36,11 +37,11 @@ func GuildDelete(bot *discordgo.Session, guildDelete *discordgo.GuildDelete, hak
 
 	err := hakaseClient.DeleteCourse(transaction, guildDelete.Guild.ID)
 	if err != nil {
-		slog.Error(fmt.Sprintf("failed to delete course: %s", err))
+		slog.Error(stacktrace.Propagate(err, "failed to delete course").Error())
 	}
 
 	err = bot.UpdateCustomStatus(fmt.Sprintf("assisting %d classes", len(bot.State.Guilds)))
 	if err != nil {
-		slog.Error(fmt.Sprintf("failed to update status: %s", err))
+		slog.Error(stacktrace.Propagate(err, "failed to update status").Error())
 	}
 }

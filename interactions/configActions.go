@@ -9,6 +9,7 @@ import (
 	"github.com/dragonejt/hakase-discord/clients"
 	"github.com/dragonejt/hakase-discord/views"
 	"github.com/getsentry/sentry-go"
+	"github.com/palantir/stacktrace"
 )
 
 func UpdateNotifyChannel(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
@@ -24,7 +25,7 @@ func UpdateNotifyChannel(bot *discordgo.Session, interactionCreate *discordgo.In
 			},
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 		}
 		return
 	}
@@ -35,7 +36,7 @@ func UpdateNotifyChannel(bot *discordgo.Session, interactionCreate *discordgo.In
 		NotifyChannel: notifyChannel,
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error updating course: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "error updating course").Error())
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
@@ -44,13 +45,13 @@ func UpdateNotifyChannel(bot *discordgo.Session, interactionCreate *discordgo.In
 			},
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 		}
 	}
 
 	updatedCourse, err := hakaseClient.ReadCourse(transaction, interactionCreate.GuildID)
 	if err != nil {
-		slog.Error(fmt.Sprintf("error reading updated course: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "error reading updated course").Error())
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
@@ -59,7 +60,7 @@ func UpdateNotifyChannel(bot *discordgo.Session, interactionCreate *discordgo.In
 			},
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 		}
 	}
 
@@ -71,7 +72,7 @@ func UpdateNotifyChannel(bot *discordgo.Session, interactionCreate *discordgo.In
 		},
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 	}
 }
 
@@ -88,7 +89,7 @@ func UpdateNotifyRole(bot *discordgo.Session, interactionCreate *discordgo.Inter
 			},
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 		}
 		return
 	}
@@ -99,7 +100,7 @@ func UpdateNotifyRole(bot *discordgo.Session, interactionCreate *discordgo.Inter
 		NotifyGroup: notifyRole,
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error updating course: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "error updating course").Error())
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
@@ -108,13 +109,13 @@ func UpdateNotifyRole(bot *discordgo.Session, interactionCreate *discordgo.Inter
 			},
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 		}
 	}
 
 	updatedCourse, err := hakaseClient.ReadCourse(transaction, interactionCreate.GuildID)
 	if err != nil {
-		slog.Error(fmt.Sprintf("error reading updated course: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "error reading updated course").Error())
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
@@ -123,7 +124,7 @@ func UpdateNotifyRole(bot *discordgo.Session, interactionCreate *discordgo.Inter
 			},
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 		}
 	}
 
@@ -135,6 +136,6 @@ func UpdateNotifyRole(bot *discordgo.Session, interactionCreate *discordgo.Inter
 		},
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 	}
 }

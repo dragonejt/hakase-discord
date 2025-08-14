@@ -9,6 +9,7 @@ import (
 	"github.com/dragonejt/hakase-discord/clients"
 	"github.com/dragonejt/hakase-discord/views"
 	"github.com/getsentry/sentry-go"
+	"github.com/palantir/stacktrace"
 )
 
 var AssignmentsCommand = discordgo.ApplicationCommand{
@@ -58,7 +59,7 @@ func getAssignment(span *sentry.Span, interactionCreate *discordgo.InteractionCr
 			},
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 		}
 	} else {
 		err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -69,7 +70,7 @@ func getAssignment(span *sentry.Span, interactionCreate *discordgo.InteractionCr
 			},
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 		}
 	}
 }
@@ -88,7 +89,7 @@ func listAssignments(span *sentry.Span, interactionCreate *discordgo.Interaction
 			},
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 		}
 	} else {
 		err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -99,7 +100,7 @@ func listAssignments(span *sentry.Span, interactionCreate *discordgo.Interaction
 			},
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 		}
 	}
 }

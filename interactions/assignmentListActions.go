@@ -11,6 +11,7 @@ import (
 	"github.com/dragonejt/hakase-discord/clients"
 	"github.com/dragonejt/hakase-discord/views"
 	"github.com/getsentry/sentry-go"
+	"github.com/palantir/stacktrace"
 )
 
 func AddAssignment(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
@@ -26,7 +27,7 @@ func AddAssignment(bot *discordgo.Session, interactionCreate *discordgo.Interact
 			},
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 		}
 		return
 	}
@@ -40,7 +41,7 @@ func AddAssignment(bot *discordgo.Session, interactionCreate *discordgo.Interact
 		},
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 	}
 
 }
@@ -54,7 +55,7 @@ func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.In
 		Type: discordgo.InteractionResponseDeferredMessageUpdate,
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 	}
 
 	assignmentData := interactionCreate.ModalSubmitData()
@@ -64,7 +65,7 @@ func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.In
 			Content: fmt.Sprintf("error parsing due date: %s", err.Error()),
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 		}
 		return
 	}
@@ -84,7 +85,7 @@ func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.In
 			Content: "due date before current time! hakase does not support this.",
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 		}
 		return
 	}
@@ -96,7 +97,7 @@ func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.In
 			Flags:   discordgo.MessageFlagsEphemeral,
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 		}
 		return
 	}
@@ -117,6 +118,6 @@ func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.In
 		Components: []discordgo.MessageComponent{views.AssignmentActions(createdAssignment)},
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 	}
 }

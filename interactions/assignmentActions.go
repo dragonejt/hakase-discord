@@ -12,6 +12,7 @@ import (
 	"github.com/dragonejt/hakase-discord/clients"
 	"github.com/dragonejt/hakase-discord/views"
 	"github.com/getsentry/sentry-go"
+	"github.com/palantir/stacktrace"
 )
 
 func UpdateAssignment(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
@@ -27,7 +28,7 @@ func UpdateAssignment(bot *discordgo.Session, interactionCreate *discordgo.Inter
 			},
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 		}
 		return
 	}
@@ -35,7 +36,7 @@ func UpdateAssignment(bot *discordgo.Session, interactionCreate *discordgo.Inter
 	assignmentID := strings.Split(interactionCreate.MessageComponentData().CustomID, "_")[1]
 	assignment, err := hakaseClient.ReadAssignment(transaction, assignmentID)
 	if err != nil {
-		slog.Error(fmt.Sprintf("error reading assignment: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "error reading assignment").Error())
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
@@ -44,7 +45,7 @@ func UpdateAssignment(bot *discordgo.Session, interactionCreate *discordgo.Inter
 			},
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 		}
 	}
 	err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -56,7 +57,7 @@ func UpdateAssignment(bot *discordgo.Session, interactionCreate *discordgo.Inter
 		},
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 	}
 }
 
@@ -69,7 +70,7 @@ func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo
 		Type: discordgo.InteractionResponseDeferredMessageUpdate,
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 	}
 
 	assignmentID := strings.Split(interactionCreate.ModalSubmitData().CustomID, "_")[1]
@@ -85,7 +86,7 @@ func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo
 				Content: fmt.Sprintf("error parsing due date: %s", err.Error()),
 			})
 			if err != nil {
-				slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+				slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 			}
 			return
 		}
@@ -108,7 +109,7 @@ func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo
 			Content: "new due date before original assignment due date! hakase does not support this.",
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 		}
 		return
 	}
@@ -116,13 +117,13 @@ func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo
 	assignment.ID = currentAssignment.ID
 	updatedAssignment, err := hakaseClient.UpdateAssignment(transaction, assignment)
 	if err != nil {
-		slog.Error(fmt.Sprintf("error updating assignment: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "error updating assignment").Error())
 		_, err := bot.FollowupMessageCreate(interactionCreate.Interaction, false, &discordgo.WebhookParams{
 			Content: err.Error(),
 			Flags:   discordgo.MessageFlagsEphemeral,
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 		}
 		return
 	}
@@ -133,7 +134,7 @@ func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo
 		Components: []discordgo.MessageComponent{views.AssignmentActions(updatedAssignment)},
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 	}
 }
 
@@ -145,7 +146,7 @@ func DeleteAssignment(bot *discordgo.Session, interactionCreate *discordgo.Inter
 	assignmentID := strings.Split(interactionCreate.MessageComponentData().CustomID, "_")[1]
 	err := hakaseClient.DeleteAssignment(transaction, assignmentID)
 	if err != nil {
-		slog.Error(fmt.Sprintf("unable to delete assignment %s: %s", assignmentID, err.Error()))
+		slog.Error(stacktrace.Propagate(err, "unable to delete assignment %s", assignmentID).Error())
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
@@ -154,7 +155,7 @@ func DeleteAssignment(bot *discordgo.Session, interactionCreate *discordgo.Inter
 			},
 		})
 		if err != nil {
-			slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+			slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 		}
 		return
 	}
@@ -166,6 +167,6 @@ func DeleteAssignment(bot *discordgo.Session, interactionCreate *discordgo.Inter
 		},
 	})
 	if err != nil {
-		slog.Error(fmt.Sprintf("error responding to interaction: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "error responding to interaction").Error())
 	}
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/dragonejt/hakase-discord/clients"
 	"github.com/getsentry/sentry-go"
+	"github.com/palantir/stacktrace"
 )
 
 func Ready(bot *discordgo.Session, ready *discordgo.Ready) {
@@ -19,6 +20,6 @@ func Ready(bot *discordgo.Session, ready *discordgo.Ready) {
 
 	err := bot.UpdateCustomStatus(fmt.Sprintf("assisting %d classes", len(bot.State.Guilds)))
 	if err != nil {
-		slog.Error(fmt.Sprintf("failed to update status: %s", err))
+		slog.Error(stacktrace.Propagate(err, "failed to update status").Error())
 	}
 }

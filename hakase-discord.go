@@ -14,6 +14,7 @@ import (
 	"github.com/dragonejt/hakase-discord/interactions"
 	"github.com/dragonejt/hakase-discord/settings"
 	"github.com/getsentry/sentry-go"
+	"github.com/palantir/stacktrace"
 )
 
 func main() {
@@ -38,7 +39,7 @@ func main() {
 
 	bot, err := discordgo.New(fmt.Sprintf("Bot %s", settings.DISCORD_BOT_TOKEN))
 	if err != nil {
-		slog.Error(fmt.Sprintf("error creating discord session: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "failed to create discord session").Error())
 		return
 	}
 	bot.StateEnabled = true
@@ -54,7 +55,7 @@ func main() {
 
 	err = bot.Open()
 	if err != nil {
-		slog.Error(fmt.Sprintf("error opening connection to discord: %s", err.Error()))
+		slog.Error(stacktrace.Propagate(err, "failed to open discord session").Error())
 		return
 	}
 	defer bot.Close()
@@ -76,7 +77,7 @@ func main() {
 	for _, cmd := range interactions {
 		_, err = bot.ApplicationCommandCreate(bot.State.User.ID, "", cmd)
 		if err != nil {
-			slog.Error(fmt.Sprintf("error registering command: %s, %s", cmd.Name, err.Error()))
+			slog.Error(stacktrace.Propagate(err, "failed to register command: %s", cmd.Name).Error())
 		} else {
 			slog.Info(fmt.Sprintf("successfully registered command: %s", cmd.Name))
 		}

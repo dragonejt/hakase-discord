@@ -11,20 +11,21 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
+	"github.com/palantir/stacktrace"
 )
 
 func ListenToStream(bot *discordgo.Session, stopListener chan bool) {
 	slog.Info(fmt.Sprintf("opening NATS consumer connection to: %s", settings.NATS_URL))
 	connection, err := nats.Connect(settings.NATS_URL)
 	if err != nil {
-		slog.Error(err.Error())
+		slog.Error(stacktrace.Propagate(err, "error connecting to NATS: %s", settings.NATS_URL).Error())
 		return
 	}
 	defer func() {
 		slog.Info("draining NATS consumer connection")
 		err := connection.Drain()
 		if err != nil {
-			slog.Error(err.Error())
+			slog.Error(stacktrace.Propagate(err, "error draining NATS connection").Error())
 			return
 		}
 	}()
@@ -32,7 +33,7 @@ func ListenToStream(bot *discordgo.Session, stopListener chan bool) {
 	slog.Debug("opening jetstream consumer connection")
 	js, err := jetstream.New(connection)
 	if err != nil {
-		slog.Error(err.Error())
+		slog.Error(stacktrace.Propagate(err, "error opening jetstream publisher connection").Error())
 		return
 	}
 
@@ -45,7 +46,7 @@ func ListenToStream(bot *discordgo.Session, stopListener chan bool) {
 		Subjects: []string{fmt.Sprintf("%s.*", settings.STREAM_NAME)},
 	})
 	if err != nil {
-		slog.Error(err.Error())
+		slog.Error(stacktrace.Propagate(err, "error creating stream with name: %s", settings.STREAM_NAME).Error())
 		return
 	}
 
@@ -55,7 +56,7 @@ func ListenToStream(bot *discordgo.Session, stopListener chan bool) {
 		AckPolicy: jetstream.AckExplicitPolicy,
 	})
 	if err != nil {
-		slog.Error(err.Error())
+		slog.Error(stacktrace.Propagate(err, "error creating consumer for stream: %s", settings.STREAM_NAME).Error())
 		return
 	}
 
@@ -63,7 +64,7 @@ func ListenToStream(bot *discordgo.Session, stopListener chan bool) {
 		consumeMessage(bot, message)
 	})
 	if err != nil {
-		slog.Error(err.Error())
+		slog.Error(stacktrace.Propagate(err, "error subscribing to stream: %s", settings.STREAM_NAME).Error())
 		return
 	}
 	defer subscription.Drain()
@@ -79,7 +80,6 @@ func consumeMessage(bot *discordgo.Session, message jetstream.Msg) {
 
 	err := message.Ack()
 	if err != nil {
-		slog.Error(err.Error())
-		panic(err)
+		slog.Error(stacktrace.Propagate(err, "failed to acknowledge message with subject: %s", message.Subject()).Error())
 	}
 }
