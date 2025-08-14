@@ -14,7 +14,7 @@ import (
 func GuildCreate(bot *discordgo.Session, guildCreate *discordgo.GuildCreate, hakaseClient clients.HakaseClient) {
 	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "guildCreate")
 	defer transaction.Finish()
-	slog.Info(fmt.Sprintf("added to guild: %s (%s)", guildCreate.Guild.Name, guildCreate.Guild.ID))
+	slog.Info(fmt.Sprintf("added to guild: %s (%s)", guildCreate.Name, guildCreate.ID))
 
 	course := clients.Course{
 		CourseID: guildCreate.Guild.ID,
@@ -33,9 +33,9 @@ func GuildCreate(bot *discordgo.Session, guildCreate *discordgo.GuildCreate, hak
 func GuildDelete(bot *discordgo.Session, guildDelete *discordgo.GuildDelete, hakaseClient clients.HakaseClient) {
 	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "guildDelete")
 	defer transaction.Finish()
-	slog.Info(fmt.Sprintf("removed from guild: %s (%s)", guildDelete.Guild.Name, guildDelete.Guild.ID))
+	slog.Info(fmt.Sprintf("removed from guild: %s (%s)", guildDelete.Name, guildDelete.ID))
 
-	err := hakaseClient.DeleteCourse(transaction, guildDelete.Guild.ID)
+	err := hakaseClient.DeleteCourse(transaction, guildDelete.ID)
 	if err != nil {
 		slog.Error(stacktrace.Propagate(err, "failed to delete course").Error())
 	}

@@ -58,7 +58,6 @@ func main() {
 		slog.Error(stacktrace.Propagate(err, "failed to open discord session").Error())
 		return
 	}
-	defer bot.Close()
 
 	slog.Info("registering event handlers")
 	bot.AddHandler(events.Ready)
@@ -88,4 +87,9 @@ func main() {
 	<-sc
 
 	stopListener <- true
+
+	err = bot.Close()
+	if err != nil {
+		slog.Error(stacktrace.Propagate(err, "failed to close discord session").Error())
+	}
 }
