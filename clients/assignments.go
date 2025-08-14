@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/palantir/stacktrace"
 )
 
 type Assignment struct {
@@ -28,7 +29,7 @@ func (backend *BackendClient) ReadAssignment(span *sentry.Span, assignmentID str
 
 	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/assignments?id=%s", backend.URL, assignmentID), nil)
 	if err != nil {
-		return assignment, fmt.Errorf("failed to create API request: %w", err)
+		return assignment, stacktrace.Propagate(err, "failed to create API request")
 	}
 	request.Header.Add("accept", "application/json")
 	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
@@ -37,20 +38,20 @@ func (backend *BackendClient) ReadAssignment(span *sentry.Span, assignmentID str
 
 	response, err := backend.HTTP_CLIENT.Do(request)
 	if err != nil {
-		return assignment, fmt.Errorf("failed to execute API request: %w", err)
+		return assignment, stacktrace.Propagate(err, "failed to execute API request")
 	}
 	if response.StatusCode != http.StatusOK {
-		return assignment, fmt.Errorf("failed status code API response: %d", response.StatusCode)
+		return assignment, stacktrace.Propagate(err, "failed status code API response: %d", response.StatusCode)
 	}
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return assignment, fmt.Errorf("failed reading API response body: %d", response.StatusCode)
+		return assignment, stacktrace.Propagate(err, "failed reading API response body: %d", response.StatusCode)
 	}
 
 	err = json.Unmarshal(body, &assignment)
 	if err != nil {
-		return assignment, fmt.Errorf("failed to unmarshal API response: %s", string(body))
+		return assignment, stacktrace.Propagate(err, "failed to unmarshal API response: %s", string(body))
 	}
 
 	return assignment, nil
@@ -62,7 +63,7 @@ func (backend *BackendClient) HeadAssignment(span *sentry.Span, assignmentID str
 
 	request, err := http.NewRequest(http.MethodHead, fmt.Sprintf("%s/assignments?id=%s", backend.URL, assignmentID), nil)
 	if err != nil {
-		return fmt.Errorf("failed to create API request: %w", err)
+		return stacktrace.Propagate(err, "failed to create API request")
 	}
 	request.Header.Add("accept", "application/json")
 	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
@@ -71,10 +72,10 @@ func (backend *BackendClient) HeadAssignment(span *sentry.Span, assignmentID str
 
 	response, err := backend.HTTP_CLIENT.Do(request)
 	if err != nil {
-		return fmt.Errorf("failed to execute API request: %w", err)
+		return stacktrace.Propagate(err, "failed to execute API request")
 	}
 	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed status code API response: %d", response.StatusCode)
+		return stacktrace.Propagate(err, "failed status code API response: %d", response.StatusCode)
 	}
 
 	return nil
@@ -88,7 +89,7 @@ func (backend *BackendClient) ListAssignments(span *sentry.Span, courseID string
 
 	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/assignments?course_id=%s", backend.URL, courseID), nil)
 	if err != nil {
-		return assignments, fmt.Errorf("failed to create API request: %w", err)
+		return assignments, stacktrace.Propagate(err, "failed to create API request")
 	}
 	request.Header.Add("accept", "application/json")
 	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
@@ -97,20 +98,20 @@ func (backend *BackendClient) ListAssignments(span *sentry.Span, courseID string
 
 	response, err := backend.HTTP_CLIENT.Do(request)
 	if err != nil {
-		return assignments, fmt.Errorf("failed to execute API request: %w", err)
+		return assignments, stacktrace.Propagate(err, "failed to execute API request")
 	}
 	if response.StatusCode != http.StatusOK {
-		return assignments, fmt.Errorf("failed status code API response: %d", response.StatusCode)
+		return assignments, stacktrace.Propagate(err, "failed status code API response: %d", response.StatusCode)
 	}
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return assignments, fmt.Errorf("failed reading API response body: %d", response.StatusCode)
+		return assignments, stacktrace.Propagate(err, "failed reading API response body: %d", response.StatusCode)
 	}
 
 	err = json.Unmarshal(body, &assignments)
 	if err != nil {
-		return assignments, fmt.Errorf("failed to unmarshal API response: %s", string(body))
+		return assignments, stacktrace.Propagate(err, "failed to unmarshal API response: %s", string(body))
 	}
 
 	return assignments, nil
@@ -122,12 +123,12 @@ func (backend *BackendClient) CreateAssignment(span *sentry.Span, assignment Ass
 
 	jsonBody, err := json.Marshal(assignment)
 	if err != nil {
-		return Assignment{}, fmt.Errorf("failed to marshal assignment: %w", err)
+		return Assignment{}, stacktrace.Propagate(err, "failed to marshal assignment: %w")
 	}
 
 	request, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/assignments", backend.URL), bytes.NewReader(jsonBody))
 	if err != nil {
-		return Assignment{}, fmt.Errorf("failed to create API request: %w", err)
+		return Assignment{}, stacktrace.Propagate(err, "failed to create API request")
 	}
 	request.Header.Add("accept", "application/json")
 	request.Header.Add("content-type", "application/json")
@@ -137,20 +138,20 @@ func (backend *BackendClient) CreateAssignment(span *sentry.Span, assignment Ass
 
 	response, err := backend.HTTP_CLIENT.Do(request)
 	if err != nil {
-		return Assignment{}, fmt.Errorf("failed to execute API request: %w", err)
+		return Assignment{}, stacktrace.Propagate(err, "failed to execute API request")
 	}
 	if response.StatusCode != http.StatusCreated {
-		return Assignment{}, fmt.Errorf("failed status code API response: %d", response.StatusCode)
+		return Assignment{}, stacktrace.Propagate(err, "failed status code API response: %d", response.StatusCode)
 	}
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return Assignment{}, fmt.Errorf("failed reading API response body: %d", response.StatusCode)
+		return Assignment{}, stacktrace.Propagate(err, "failed reading API response body: %d", response.StatusCode)
 	}
 
 	err = json.Unmarshal(body, &assignment)
 	if err != nil {
-		return Assignment{}, fmt.Errorf("failed to unmarshal API response: %s", string(body))
+		return Assignment{}, stacktrace.Propagate(err, "failed to unmarshal API response: %s", string(body))
 	}
 
 	return assignment, nil
@@ -162,12 +163,12 @@ func (backend *BackendClient) UpdateAssignment(span *sentry.Span, assignment Ass
 
 	jsonBody, err := json.Marshal(assignment)
 	if err != nil {
-		return Assignment{}, fmt.Errorf("failed to marshal assignment: %w", err)
+		return Assignment{}, stacktrace.Propagate(err, "failed to marshal assignment: %w")
 	}
 
 	request, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/assignments", backend.URL), bytes.NewReader(jsonBody))
 	if err != nil {
-		return Assignment{}, fmt.Errorf("failed to create API request: %w", err)
+		return Assignment{}, stacktrace.Propagate(err, "failed to create API request")
 	}
 	request.Header.Add("accept", "application/json")
 	request.Header.Add("content-type", "application/json")
@@ -177,20 +178,20 @@ func (backend *BackendClient) UpdateAssignment(span *sentry.Span, assignment Ass
 
 	response, err := backend.HTTP_CLIENT.Do(request)
 	if err != nil {
-		return Assignment{}, fmt.Errorf("failed to execute API request: %w", err)
+		return Assignment{}, stacktrace.Propagate(err, "failed to execute API request")
 	}
 	if response.StatusCode != http.StatusAccepted {
-		return Assignment{}, fmt.Errorf("failed status code API response: %d", response.StatusCode)
+		return Assignment{}, stacktrace.Propagate(err, "failed status code API response: %d", response.StatusCode)
 	}
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return Assignment{}, fmt.Errorf("failed reading API response body: %d", response.StatusCode)
+		return Assignment{}, stacktrace.Propagate(err, "failed reading API response body: %d", response.StatusCode)
 	}
 
 	err = json.Unmarshal(body, &assignment)
 	if err != nil {
-		return Assignment{}, fmt.Errorf("failed to unmarshal API response: %s", string(body))
+		return Assignment{}, stacktrace.Propagate(err, "failed to unmarshal API response: %s", string(body))
 	}
 
 	return assignment, nil
@@ -202,7 +203,7 @@ func (backend *BackendClient) DeleteAssignment(span *sentry.Span, assignmentID s
 
 	request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/assignments?id=%s", backend.URL, assignmentID), nil)
 	if err != nil {
-		return fmt.Errorf("failed to create API request: %w", err)
+		return stacktrace.Propagate(err, "failed to create API request")
 	}
 	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
@@ -210,10 +211,10 @@ func (backend *BackendClient) DeleteAssignment(span *sentry.Span, assignmentID s
 
 	response, err := backend.HTTP_CLIENT.Do(request)
 	if err != nil {
-		return fmt.Errorf("failed to execute API request: %w", err)
+		return stacktrace.Propagate(err, "failed to execute API request")
 	}
 	if response.StatusCode != http.StatusNoContent {
-		return fmt.Errorf("failed status code API response: %d", response.StatusCode)
+		return stacktrace.Propagate(err, "failed status code API response: %d", response.StatusCode)
 	}
 
 	return nil

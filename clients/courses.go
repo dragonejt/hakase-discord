@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/palantir/stacktrace"
 )
 
 type Course struct {
@@ -26,7 +27,7 @@ func (backend *BackendClient) ReadCourse(span *sentry.Span, courseID string) (Co
 
 	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/courses?course_id=%s", backend.URL, courseID), nil)
 	if err != nil {
-		return course, fmt.Errorf("failed to create API request: %w", err)
+		return course, stacktrace.Propagate(err, "failed to create API request")
 	}
 	request.Header.Add("accept", "application/json")
 	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
@@ -35,20 +36,20 @@ func (backend *BackendClient) ReadCourse(span *sentry.Span, courseID string) (Co
 
 	response, err := backend.HTTP_CLIENT.Do(request)
 	if err != nil {
-		return course, fmt.Errorf("failed to execute API request: %w", err)
+		return course, stacktrace.Propagate(err, "failed to execute API request")
 	}
 	if response.StatusCode != http.StatusOK {
-		return course, fmt.Errorf("failed status code API response: %d", response.StatusCode)
+		return course, stacktrace.Propagate(err, "failed status code API response: %d", response.StatusCode)
 	}
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return course, fmt.Errorf("failed reading API response body: %d", response.StatusCode)
+		return course, stacktrace.Propagate(err, "failed reading API response body: %d", response.StatusCode)
 	}
 
 	err = json.Unmarshal(body, &course)
 	if err != nil {
-		return course, fmt.Errorf("failed to unmarshal API response: %s", string(body))
+		return course, stacktrace.Propagate(err, "failed to unmarshal API response: %s", string(body))
 	}
 
 	return course, nil
@@ -60,7 +61,7 @@ func (backend *BackendClient) HeadCourse(span *sentry.Span, courseID string) err
 
 	request, err := http.NewRequest(http.MethodHead, fmt.Sprintf("%s/courses?course_id=%s", backend.URL, courseID), nil)
 	if err != nil {
-		return fmt.Errorf("failed to create API request: %w", err)
+		return stacktrace.Propagate(err, "failed to create API request")
 	}
 	request.Header.Add("accept", "application/json")
 	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
@@ -69,10 +70,10 @@ func (backend *BackendClient) HeadCourse(span *sentry.Span, courseID string) err
 
 	response, err := backend.HTTP_CLIENT.Do(request)
 	if err != nil {
-		return fmt.Errorf("failed to execute API request: %w", err)
+		return stacktrace.Propagate(err, "failed to execute API request")
 	}
 	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed status code API response: %d", response.StatusCode)
+		return stacktrace.Propagate(err, "failed status code API response: %d", response.StatusCode)
 	}
 
 	return nil
@@ -84,12 +85,12 @@ func (backend *BackendClient) CreateCourse(span *sentry.Span, course Course) err
 
 	jsonBody, err := json.Marshal(course)
 	if err != nil {
-		return fmt.Errorf("failed to marshal course: %w", err)
+		return stacktrace.Propagate(err, "failed to marshal course: %w")
 	}
 
 	request, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/courses", backend.URL), bytes.NewReader(jsonBody))
 	if err != nil {
-		return fmt.Errorf("failed to create API request: %w", err)
+		return stacktrace.Propagate(err, "failed to create API request")
 	}
 	request.Header.Add("accept", "application/json")
 	request.Header.Add("content-type", "application/json")
@@ -99,20 +100,20 @@ func (backend *BackendClient) CreateCourse(span *sentry.Span, course Course) err
 
 	response, err := backend.HTTP_CLIENT.Do(request)
 	if err != nil {
-		return fmt.Errorf("failed to execute API request: %w", err)
+		return stacktrace.Propagate(err, "failed to execute API request")
 	}
 	if response.StatusCode != http.StatusCreated {
-		return fmt.Errorf("failed status code API response: %d", response.StatusCode)
+		return stacktrace.Propagate(err, "failed status code API response: %d", response.StatusCode)
 	}
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return fmt.Errorf("failed reading API response body: %d", response.StatusCode)
+		return stacktrace.Propagate(err, "failed reading API response body: %d", response.StatusCode)
 	}
 
 	err = json.Unmarshal(body, &course)
 	if err != nil {
-		return fmt.Errorf("failed to unmarshal API response: %s", string(body))
+		return stacktrace.Propagate(err, "failed to unmarshal API response: %s", string(body))
 	}
 
 	return nil
@@ -124,12 +125,12 @@ func (backend *BackendClient) UpdateCourse(span *sentry.Span, course Course) err
 
 	jsonBody, err := json.Marshal(course)
 	if err != nil {
-		return fmt.Errorf("failed to marshal course: %w", err)
+		return stacktrace.Propagate(err, "failed to marshal course: %w")
 	}
 
 	request, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/courses", backend.URL), bytes.NewReader(jsonBody))
 	if err != nil {
-		return fmt.Errorf("failed to create API request: %w", err)
+		return stacktrace.Propagate(err, "failed to create API request")
 	}
 	request.Header.Add("accept", "application/json")
 	request.Header.Add("content-type", "application/json")
@@ -139,20 +140,20 @@ func (backend *BackendClient) UpdateCourse(span *sentry.Span, course Course) err
 
 	response, err := backend.HTTP_CLIENT.Do(request)
 	if err != nil {
-		return fmt.Errorf("failed to execute API request: %w", err)
+		return stacktrace.Propagate(err, "failed to execute API request")
 	}
 	if response.StatusCode != http.StatusAccepted {
-		return fmt.Errorf("failed status code API response: %d", response.StatusCode)
+		return stacktrace.Propagate(err, "failed status code API response: %d", response.StatusCode)
 	}
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return fmt.Errorf("failed reading API response body: %d", response.StatusCode)
+		return stacktrace.Propagate(err, "failed reading API response body: %d", response.StatusCode)
 	}
 
 	err = json.Unmarshal(body, &course)
 	if err != nil {
-		return fmt.Errorf("failed to unmarshal API response: %s", string(body))
+		return stacktrace.Propagate(err, "failed to unmarshal API response: %s", string(body))
 	}
 
 	return nil
@@ -164,7 +165,7 @@ func (backend *BackendClient) DeleteCourse(span *sentry.Span, courseID string) e
 
 	request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/courses?course_id=%s", backend.URL, courseID), nil)
 	if err != nil {
-		return fmt.Errorf("failed to create API request: %w", err)
+		return stacktrace.Propagate(err, "failed to create API request")
 	}
 	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
@@ -172,10 +173,10 @@ func (backend *BackendClient) DeleteCourse(span *sentry.Span, courseID string) e
 
 	response, err := backend.HTTP_CLIENT.Do(request)
 	if err != nil {
-		return fmt.Errorf("failed to execute API request: %w", err)
+		return stacktrace.Propagate(err, "failed to execute API request")
 	}
 	if response.StatusCode != http.StatusNoContent {
-		return fmt.Errorf("failed status code API response: %d", response.StatusCode)
+		return stacktrace.Propagate(err, "failed status code API response: %d", response.StatusCode)
 	}
 
 	return nil
