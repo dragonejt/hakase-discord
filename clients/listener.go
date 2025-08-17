@@ -140,12 +140,12 @@ func consumeAssignmentNotification(span *sentry.Span, hakaseClient HakaseClient,
 		if err != nil {
 			slog.Error(stacktrace.Propagate(err, "failed to send assignment notification for %d", assignment.ID).Error())
 			// retry sending assignment notification in 15 minutes
-			message.NakWithDelay(15 * time.Minute)
+			_ = message.NakWithDelay(15 * time.Minute)
 		}
 	} else {
 		err := message.NakWithDelay(time.Until(notificationTime))
 		if err != nil {
-			bot.ChannelMessageSend(notificationsChannel, fmt.Sprintf("**[assignment notification error]** failed to schedule assignment notifications for assignment: %s", assignment.Name))
+			_, _ = bot.ChannelMessageSend(notificationsChannel, fmt.Sprintf("**[assignment notification error]** failed to schedule assignment notifications for assignment: %s", assignment.Name))
 			slog.Error(stacktrace.Propagate(err, "failed to schedule assignment notifications for %d", assignment.ID).Error())
 		}
 	}
