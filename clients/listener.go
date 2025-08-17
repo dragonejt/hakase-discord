@@ -84,12 +84,16 @@ func consumeMessage(bot *discordgo.Session, hakaseClient HakaseClient, message j
 	} else if message.Subject() == "assignments" {
 		consumeAssignmentNotification(transaction, hakaseClient, message)
 	} else {
-
+		slog.Error(fmt.Sprintf("unknown message subject: %s", message.Subject()))
+		err := message.Ack()
+		if err != nil {
+			slog.Error(stacktrace.Propagate(err, "failed to ACK message with subject: %s", message.Subject()).Error())
+		}
 	}
 
 }
 
-func consumeNotification(span *sentry.Span, hakaseClient HakaseClient, message jetstream.Msg) {
+func consumeNotification(span *sentry.Span, _ HakaseClient, message jetstream.Msg) {
 	span = span.StartChild("consumeNotification")
 	defer span.Finish()
 
@@ -110,7 +114,7 @@ func consumeAssignmentNotification(span *sentry.Span, hakaseClient HakaseClient,
 
 	assignment, err := hakaseClient.ReadAssignment(span, fmt.Sprint(assignmentNotification.AssignmentID))
 	if err != nil {
-		slog.Error(stacktrace.Propagate(err, "failed to get assignment with ID: %s", assignmentNotification.AssignmentID).Error())
+		slog.Error(stacktrace.Propagate(err, "failed to get assignment with ID: %d", assignmentNotification.AssignmentID).Error())
 		return
 	}
 
@@ -134,7 +138,7 @@ func consumeAssignmentNotification(span *sentry.Span, hakaseClient HakaseClient,
 	if time.Now().After(notificationTime) {
 		_, err := bot.ChannelMessageSend(notificationsChannel, fmt.Sprintf("**[assignment notification]** assignment: %s is due in %s hours!", assignment.Name, assignmentNotification.Before/time.Hour))
 		if err != nil {
-			slog.Error(stacktrace.Propagate(err, "failed to send assignment notification for %s", assignment.ID).Error())
+			slog.Error(stacktrace.Propagate(err, "failed to send assignment notification for %d", assignment.ID).Error())
 			// retry sending assignment notification in 15 minutes
 			message.NakWithDelay(15 * time.Minute)
 		}
@@ -142,7 +146,7 @@ func consumeAssignmentNotification(span *sentry.Span, hakaseClient HakaseClient,
 		err := message.NakWithDelay(time.Until(notificationTime))
 		if err != nil {
 			bot.ChannelMessageSend(notificationsChannel, fmt.Sprintf("**[assignment notification error]** failed to schedule assignment notifications for assignment: %s", assignment.Name))
-			slog.Error(stacktrace.Propagate(err, "failed to schedule assignment notifications for %s", assignment.ID).Error())
+			slog.Error(stacktrace.Propagate(err, "failed to schedule assignment notifications for %d", assignment.ID).Error())
 		}
 	}
 }
