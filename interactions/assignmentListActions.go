@@ -104,11 +104,13 @@ func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.In
 
 	go clients.PublishAssignmentNotification(transaction, clients.AssignmentNotification{
 		AssignmentID: createdAssignment.ID,
+		CourseID:     interactionCreate.GuildID,
 		Before:       time.Hour,
 	})
 
 	go clients.PublishAssignmentNotification(transaction, clients.AssignmentNotification{
 		AssignmentID: createdAssignment.ID,
+		CourseID:     interactionCreate.GuildID,
 		Before:       time.Hour * 24,
 	})
 

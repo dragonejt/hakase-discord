@@ -2,6 +2,7 @@ package clients
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"time"
@@ -14,7 +15,7 @@ import (
 	"github.com/palantir/stacktrace"
 )
 
-func ListenToStream(bot *discordgo.Session, stopListener chan bool) {
+func ListenToStream(bot *discordgo.Session, hakaseClient HakaseClient, stopListener chan bool) {
 	slog.Info(fmt.Sprintf("opening NATS consumer connection to: %s", settings.NATS_URL))
 	connection, err := nats.Connect(settings.NATS_URL)
 	if err != nil {
@@ -61,7 +62,7 @@ func ListenToStream(bot *discordgo.Session, stopListener chan bool) {
 	}
 
 	subscription, err := consumer.Consume(func(message jetstream.Msg) {
-		consumeMessage(bot, message)
+		consumeMessage(bot, hakaseClient, message)
 	})
 	if err != nil {
 		slog.Error(stacktrace.Propagate(err, "error subscribing to stream: %s", settings.STREAM_NAME).Error())
@@ -73,13 +74,75 @@ func ListenToStream(bot *discordgo.Session, stopListener chan bool) {
 
 }
 
-func consumeMessage(bot *discordgo.Session, message jetstream.Msg) {
+func consumeMessage(bot *discordgo.Session, hakaseClient HakaseClient, message jetstream.Msg) {
 	transaction := sentry.StartTransaction(context.WithValue(context.Background(), DiscordSession{}, bot), "consumeMessage")
 	defer transaction.Finish()
 	slog.Info(fmt.Sprintf("received message: %s with subject: %s", string(message.Data()), message.Subject()))
 
-	err := message.Ack()
+	if message.Subject() == "notifications" {
+		consumeNotification(transaction, hakaseClient, message)
+	} else if message.Subject() == "assignments" {
+		consumeAssignmentNotification(transaction, hakaseClient, message)
+	} else {
+
+	}
+
+}
+
+func consumeNotification(span *sentry.Span, hakaseClient HakaseClient, message jetstream.Msg) {
+	span = span.StartChild("consumeNotification")
+	defer span.Finish()
+
+	slog.Info(fmt.Sprintf("received notification with message: %s", string(message.Data())))
+}
+
+func consumeAssignmentNotification(span *sentry.Span, hakaseClient HakaseClient, message jetstream.Msg) {
+	span = span.StartChild("consumeAssignmentNotification")
+	defer span.Finish()
+	bot := span.GetTransaction().Context().Value(DiscordSession{}).(*discordgo.Session)
+
+	assignmentNotification := AssignmentNotification{}
+	err := json.Unmarshal(message.Data(), &assignmentNotification)
 	if err != nil {
-		slog.Error(stacktrace.Propagate(err, "failed to acknowledge message with subject: %s", message.Subject()).Error())
+		slog.Error(stacktrace.Propagate(err, "error unmarshalling assignment notification").Error())
+		return
+	}
+
+	assignment, err := hakaseClient.ReadAssignment(span, fmt.Sprint(assignmentNotification.AssignmentID))
+	if err != nil {
+		slog.Error(stacktrace.Propagate(err, "failed to get assignment with ID: %s", assignmentNotification.AssignmentID).Error())
+		return
+	}
+
+	course, err := hakaseClient.ReadCourse(span, assignmentNotification.CourseID)
+	if err != nil {
+		slog.Error(stacktrace.Propagate(err, "failed to get course with courseID: %s", assignmentNotification.CourseID).Error())
+		return
+	}
+
+	notificationsChannel := course.NotifyChannel
+	if notificationsChannel == "" {
+		guild, err := bot.Guild(course.CourseID)
+		if err != nil {
+			slog.Error(stacktrace.Propagate(err, "unable to get guild system channel for notifications").Error())
+			return
+		}
+		notificationsChannel = guild.SystemChannelID
+	}
+
+	notificationTime := assignment.Due.Add(-1 * assignmentNotification.Before)
+	if time.Now().After(notificationTime) {
+		_, err := bot.ChannelMessageSend(notificationsChannel, fmt.Sprintf("**[assignment notification]** assignment: %s is due in %s hours!", assignment.Name, assignmentNotification.Before/time.Hour))
+		if err != nil {
+			slog.Error(stacktrace.Propagate(err, "failed to send assignment notification for %s", assignment.ID).Error())
+			// retry sending assignment notification in 15 minutes
+			message.NakWithDelay(15 * time.Minute)
+		}
+	} else {
+		err := message.NakWithDelay(time.Until(notificationTime))
+		if err != nil {
+			bot.ChannelMessageSend(notificationsChannel, fmt.Sprintf("**[assignment notification error]** failed to schedule assignment notifications for assignment: %s", assignment.Name))
+			slog.Error(stacktrace.Propagate(err, "failed to schedule assignment notifications for %s", assignment.ID).Error())
+		}
 	}
 }

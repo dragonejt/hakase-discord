@@ -34,10 +34,12 @@ type DiscordSession struct{}
 
 type AssignmentNotification struct {
 	AssignmentID int
+	CourseID     string
 	Before       time.Duration
 }
 
 type StudySessionNotification struct {
 	SessionID int
+	CourseID  string
 	Timestamp time.Time
 }
