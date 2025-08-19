@@ -1,3 +1,4 @@
+// Package interactions provides handlers for the /assignments slash command.
 package interactions
 
 import (
@@ -25,6 +26,8 @@ var AssignmentsCommand = discordgo.ApplicationCommand{
 	},
 }
 
+// SlashAssignments handles the /assignments slash command interaction.
+// It retrieves a specific assignment or lists all assignments for the guild.
 func SlashAssignments(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
 	optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(interactionCreate.ApplicationCommandData().Options))
 	for _, opt := range interactionCreate.ApplicationCommandData().Options {
@@ -45,6 +48,7 @@ func SlashAssignments(bot *discordgo.Session, interactionCreate *discordgo.Inter
 
 }
 
+// getAssignment retrieves and responds with a specific assignment's details.
 func getAssignment(span *sentry.Span, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient, assignmentID string) {
 	span = span.StartChild("/assignments getAssignment")
 	defer span.Finish()
@@ -75,6 +79,7 @@ func getAssignment(span *sentry.Span, interactionCreate *discordgo.InteractionCr
 	}
 }
 
+// listAssignments retrieves and responds with a list of assignments for the guild.
 func listAssignments(span *sentry.Span, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
 	span = span.StartChild("/assignments listAssignments")
 	defer span.Finish()

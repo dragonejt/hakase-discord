@@ -1,3 +1,4 @@
+// Package interactions provides handlers for course config actions (update notify channel/role).
 package interactions
 
 import (
@@ -12,6 +13,7 @@ import (
 	"github.com/palantir/stacktrace"
 )
 
+// UpdateNotifyChannel updates the notifications channel for a course based on user interaction.
 func UpdateNotifyChannel(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
 	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "updateNotifyChannel")
 	defer transaction.Finish()
@@ -76,6 +78,7 @@ func UpdateNotifyChannel(bot *discordgo.Session, interactionCreate *discordgo.In
 	}
 }
 
+// UpdateNotifyRole updates the notifications role for a course based on user interaction.
 func UpdateNotifyRole(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
 	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "updateNotifyRole")
 	defer transaction.Finish()

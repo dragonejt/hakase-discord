@@ -1,3 +1,4 @@
+// Package interactions provides handlers for the /hakase slash command.
 package interactions
 
 import (
@@ -46,6 +47,8 @@ var rockPaperScissorsGIFS = []string{
 	"https://tenor.com/view/nichijou-hakase-rps-rock-paper-scissors-nano-gif-11850067363499322337",
 }
 
+// SlashHakase handles the /hakase slash command interaction.
+// It dispatches subcommands such as rock-paper-scissors and config.
 func SlashHakase(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
 	optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(interactionCreate.ApplicationCommandData().Options))
 	for _, opt := range interactionCreate.ApplicationCommandData().Options {
@@ -69,6 +72,7 @@ func SlashHakase(bot *discordgo.Session, interactionCreate *discordgo.Interactio
 	}
 }
 
+// ping responds to the /hakase command with a pong and backend response time.
 func ping(span *sentry.Span, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
 	span = span.StartChild("/hakase ping")
 	defer span.Finish()
@@ -92,6 +96,7 @@ func ping(span *sentry.Span, interactionCreate *discordgo.InteractionCreate, hak
 
 }
 
+// rockPaperScissors responds with a random rock-paper-scissors GIF.
 func rockPaperScissors(span *sentry.Span, interactionCreate *discordgo.InteractionCreate) {
 	span = span.StartChild("/hakase rockPaperScissors")
 	defer span.Finish()
@@ -108,6 +113,7 @@ func rockPaperScissors(span *sentry.Span, interactionCreate *discordgo.Interacti
 	}
 }
 
+// config responds with the course configuration embed and components.
 func config(span *sentry.Span, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
 	span = span.StartChild("/hakase config")
 	defer span.Finish()

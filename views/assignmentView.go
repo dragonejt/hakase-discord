@@ -1,3 +1,4 @@
+// Package views provides Discord message embeds and components for assignments.
 package views
 
 import (
@@ -8,6 +9,8 @@ import (
 	"github.com/dragonejt/hakase-discord/clients"
 )
 
+// AssignmentView returns a Discord message embed for the given assignment and member.
+// It displays assignment details such as name, due date, author, and link.
 func AssignmentView(member *discordgo.Member, assignment clients.Assignment) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:       assignment.Name,
@@ -18,6 +21,7 @@ func AssignmentView(member *discordgo.Member, assignment clients.Assignment) *di
 	}
 }
 
+// AssignmentActions returns action buttons for editing or removing the given assignment.
 func AssignmentActions(assignment clients.Assignment) *discordgo.ActionsRow {
 	return &discordgo.ActionsRow{
 		Components: []discordgo.MessageComponent{
@@ -41,6 +45,8 @@ func AssignmentActions(assignment clients.Assignment) *discordgo.ActionsRow {
 	}
 }
 
+// AssignmentModal returns modal components for creating or updating an assignment.
+// If assignment is nil, it creates a new assignment modal.
 func AssignmentModal(assignment *clients.Assignment) []discordgo.MessageComponent {
 
 	newAssignment := assignment == nil

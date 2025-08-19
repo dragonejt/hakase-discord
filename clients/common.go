@@ -1,3 +1,4 @@
+// Package clients provides interfaces and types for interacting with the backend API and Discord session.
 package clients
 
 import (

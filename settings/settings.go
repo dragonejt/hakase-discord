@@ -1,3 +1,4 @@
+// Package settings provides environment variable configuration for the bot.
 package settings
 
 import "os"

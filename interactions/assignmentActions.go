@@ -1,3 +1,4 @@
+// Package interactions provides handlers for assignment actions (edit, update, delete).
 package interactions
 
 import (
@@ -15,6 +16,7 @@ import (
 	"github.com/palantir/stacktrace"
 )
 
+// UpdateAssignment opens a modal for updating an assignment via Discord interaction.
 func UpdateAssignment(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
 	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "updateAssignmentAction")
 	defer transaction.Finish()
@@ -61,6 +63,7 @@ func UpdateAssignment(bot *discordgo.Session, interactionCreate *discordgo.Inter
 	}
 }
 
+// UpdateAssignmentSubmit handles the submission of the update assignment modal and updates the assignment.
 func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
 	slog.Info(fmt.Sprintf("updateAssignmentSubmit executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
 	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "updateAssignmentSubmit")
@@ -138,6 +141,7 @@ func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo
 	}
 }
 
+// DeleteAssignment deletes an assignment based on user interaction.
 func DeleteAssignment(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
 	slog.Debug(fmt.Sprintf("deleteAssignment executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
 	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "deleteAssignmentAction")

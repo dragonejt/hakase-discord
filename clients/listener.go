@@ -1,3 +1,4 @@
+// Package clients provides functions for consuming messages from NATS JetStream.
 package clients
 
 import (
@@ -15,6 +16,7 @@ import (
 	"github.com/palantir/stacktrace"
 )
 
+// ListenToStream starts a JetStream consumer and listens for messages, dispatching them to handlers.
 func ListenToStream(bot *discordgo.Session, hakaseClient HakaseClient, stopListener chan bool) {
 	slog.Info(fmt.Sprintf("opening NATS consumer connection to: %s", settings.NATS_URL))
 	connection, err := nats.Connect(settings.NATS_URL)
@@ -74,6 +76,7 @@ func ListenToStream(bot *discordgo.Session, hakaseClient HakaseClient, stopListe
 
 }
 
+// consumeMessage dispatches messages based on their subject to the appropriate handler.
 func consumeMessage(bot *discordgo.Session, hakaseClient HakaseClient, message jetstream.Msg) {
 	transaction := sentry.StartTransaction(context.WithValue(context.Background(), DiscordSession{}, bot), "consumeMessage")
 	defer transaction.Finish()
@@ -93,6 +96,7 @@ func consumeMessage(bot *discordgo.Session, hakaseClient HakaseClient, message j
 
 }
 
+// consumeNotification handles notification messages received from JetStream.
 func consumeNotification(span *sentry.Span, _ HakaseClient, message jetstream.Msg) {
 	span = span.StartChild("consumeNotification")
 	defer span.Finish()
@@ -100,6 +104,7 @@ func consumeNotification(span *sentry.Span, _ HakaseClient, message jetstream.Ms
 	slog.Info(fmt.Sprintf("received notification with message: %s", string(message.Data())))
 }
 
+// consumeAssignmentNotification handles assignment notification messages received from JetStream.
 func consumeAssignmentNotification(span *sentry.Span, hakaseClient HakaseClient, message jetstream.Msg) {
 	span = span.StartChild("consumeAssignmentNotification")
 	defer span.Finish()

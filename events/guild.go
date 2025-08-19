@@ -1,3 +1,4 @@
+// Package events provides Discord event handlers for guild create and delete.
 package events
 
 import (
@@ -11,6 +12,7 @@ import (
 	"github.com/palantir/stacktrace"
 )
 
+// GuildCreate handles the event when the bot is added to a guild and creates a course.
 func GuildCreate(bot *discordgo.Session, guildCreate *discordgo.GuildCreate, hakaseClient clients.HakaseClient) {
 	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "guildCreate")
 	defer transaction.Finish()
@@ -30,6 +32,7 @@ func GuildCreate(bot *discordgo.Session, guildCreate *discordgo.GuildCreate, hak
 	}
 }
 
+// GuildDelete handles the event when the bot is removed from a guild and deletes the course.
 func GuildDelete(bot *discordgo.Session, guildDelete *discordgo.GuildDelete, hakaseClient clients.HakaseClient) {
 	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "guildDelete")
 	defer transaction.Finish()

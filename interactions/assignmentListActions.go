@@ -1,3 +1,4 @@
+// Package interactions provides handlers for assignment list actions (add assignment).
 package interactions
 
 import (
@@ -14,6 +15,7 @@ import (
 	"github.com/palantir/stacktrace"
 )
 
+// AddAssignment opens a modal for adding a new assignment via Discord interaction.
 func AddAssignment(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
 	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "addAssignmentAction")
 	defer transaction.Finish()
@@ -46,6 +48,7 @@ func AddAssignment(bot *discordgo.Session, interactionCreate *discordgo.Interact
 
 }
 
+// AddAssignmentSubmit handles the submission of the add assignment modal and creates the assignment.
 func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
 	slog.Info(fmt.Sprintf("addAssignmentSubmit executed by %s (%s) in %s", interactionCreate.Member.User.Username, interactionCreate.Member.User.ID, interactionCreate.GuildID))
 	transaction := sentry.StartTransaction(context.WithValue(context.Background(), clients.DiscordSession{}, bot), "addAssignmentSubmit")

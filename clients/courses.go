@@ -1,3 +1,4 @@
+// Package clients implements backend API operations for courses.
 package clients
 
 import (
@@ -19,6 +20,7 @@ type Course struct {
 	NotifyGroup   string `json:"notify_group,omitempty"`
 }
 
+// ReadCourse retrieves a course by its ID from the backend.
 func (backend *BackendClient) ReadCourse(span *sentry.Span, courseID string) (Course, error) {
 	span = span.StartChild("readCourse")
 	defer span.Finish()
@@ -55,6 +57,7 @@ func (backend *BackendClient) ReadCourse(span *sentry.Span, courseID string) (Co
 	return course, nil
 }
 
+// HeadCourse checks if a course exists in the backend.
 func (backend *BackendClient) HeadCourse(span *sentry.Span, courseID string) error {
 	span = span.StartChild("headCourse")
 	defer span.Finish()
@@ -79,6 +82,7 @@ func (backend *BackendClient) HeadCourse(span *sentry.Span, courseID string) err
 	return nil
 }
 
+// CreateCourse creates a new course in the backend.
 func (backend *BackendClient) CreateCourse(span *sentry.Span, course Course) error {
 	span = span.StartChild("createCourse")
 	defer span.Finish()
@@ -119,6 +123,7 @@ func (backend *BackendClient) CreateCourse(span *sentry.Span, course Course) err
 	return nil
 }
 
+// UpdateCourse updates an existing course in the backend.
 func (backend *BackendClient) UpdateCourse(span *sentry.Span, course Course) error {
 	span = span.StartChild("updateCourse")
 	defer span.Finish()
@@ -159,6 +164,7 @@ func (backend *BackendClient) UpdateCourse(span *sentry.Span, course Course) err
 	return nil
 }
 
+// DeleteCourse deletes a course from the backend.
 func (backend *BackendClient) DeleteCourse(span *sentry.Span, courseID string) error {
 	span = span.StartChild("deleteCourse")
 	defer span.Finish()

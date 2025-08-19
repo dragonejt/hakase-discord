@@ -1,3 +1,4 @@
+// Package views provides Discord message embeds and components for course configuration.
 package views
 
 import (
@@ -7,6 +8,8 @@ import (
 	"github.com/dragonejt/hakase-discord/clients"
 )
 
+// ConfigView returns a Discord message embed displaying the configuration for a course.
+// It shows the notifications channel and role for the given course.
 func ConfigView(course clients.Course) *discordgo.MessageEmbed {
 	notifyChannel, notifyRole := course.NotifyChannel, course.NotifyGroup
 	if notifyChannel != "" {
@@ -31,6 +34,7 @@ func ConfigView(course clients.Course) *discordgo.MessageEmbed {
 	}
 }
 
+// ConfigActions returns Discord message components for updating the course's notifications channel and role.
 func ConfigActions() []discordgo.MessageComponent {
 	return []discordgo.MessageComponent{
 		&discordgo.ActionsRow{

@@ -1,3 +1,4 @@
+// Package clients provides functions for publishing notifications to NATS JetStream.
 package clients
 
 import (
@@ -52,6 +53,7 @@ func publishMessage(span *sentry.Span, subject string, message []byte) error {
 	return nil
 }
 
+// PublishNotification publishes a notification message to the notifications subject in JetStream.
 func PublishNotification(span *sentry.Span, notification string) {
 	span = span.StartChild("publishNotification")
 	defer span.Finish()
@@ -63,6 +65,7 @@ func PublishNotification(span *sentry.Span, notification string) {
 	}
 }
 
+// PublishAssignmentNotification publishes an assignment notification to the assignments subject in JetStream.
 func PublishAssignmentNotification(span *sentry.Span, notification AssignmentNotification) {
 	span = span.StartChild("publishAssignmentNotification")
 	defer span.Finish()
@@ -79,6 +82,7 @@ func PublishAssignmentNotification(span *sentry.Span, notification AssignmentNot
 	}
 }
 
+// PublishStudySessionNotification publishes a study session notification to the study_sessions subject in JetStream.
 func PublishStudySessionNotification(span *sentry.Span, notification StudySessionNotification) {
 	span = span.StartChild("publishStudySessionNotification")
 	defer span.Finish()

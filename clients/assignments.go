@@ -1,3 +1,4 @@
+// Package clients implements backend API operations for assignments.
 package clients
 
 import (
@@ -21,6 +22,7 @@ type Assignment struct {
 	Link     string    `json:"link,omitempty"`
 }
 
+// ReadAssignment retrieves an assignment by its ID from the backend.
 func (backend *BackendClient) ReadAssignment(span *sentry.Span, assignmentID string) (Assignment, error) {
 	span = span.StartChild("readAssignment")
 	defer span.Finish()
@@ -57,6 +59,7 @@ func (backend *BackendClient) ReadAssignment(span *sentry.Span, assignmentID str
 	return assignment, nil
 }
 
+// HeadAssignment checks if an assignment exists in the backend.
 func (backend *BackendClient) HeadAssignment(span *sentry.Span, assignmentID string) error {
 	span = span.StartChild("headAssignment")
 	defer span.Finish()
@@ -81,6 +84,7 @@ func (backend *BackendClient) HeadAssignment(span *sentry.Span, assignmentID str
 	return nil
 }
 
+// ListAssignments lists all assignments for a course.
 func (backend *BackendClient) ListAssignments(span *sentry.Span, courseID string) ([]Assignment, error) {
 	span = span.StartChild("listAssignments")
 	defer span.Finish()
@@ -117,6 +121,7 @@ func (backend *BackendClient) ListAssignments(span *sentry.Span, courseID string
 	return assignments, nil
 }
 
+// CreateAssignment creates a new assignment in the backend.
 func (backend *BackendClient) CreateAssignment(span *sentry.Span, assignment Assignment) (Assignment, error) {
 	span = span.StartChild("createAssignment")
 	defer span.Finish()
@@ -157,6 +162,7 @@ func (backend *BackendClient) CreateAssignment(span *sentry.Span, assignment Ass
 	return assignment, nil
 }
 
+// UpdateAssignment updates an existing assignment in the backend.
 func (backend *BackendClient) UpdateAssignment(span *sentry.Span, assignment Assignment) (Assignment, error) {
 	span = span.StartChild("updateAssignment")
 	defer span.Finish()
@@ -197,6 +203,7 @@ func (backend *BackendClient) UpdateAssignment(span *sentry.Span, assignment Ass
 	return assignment, nil
 }
 
+// DeleteAssignment deletes an assignment from the backend.
 func (backend *BackendClient) DeleteAssignment(span *sentry.Span, assignmentID string) error {
 	span = span.StartChild("deleteAssignment")
 	defer span.Finish()

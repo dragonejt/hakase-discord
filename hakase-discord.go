@@ -1,3 +1,6 @@
+// hakase-discord is the entry point for the Discord bot.
+// It initializes logging, Sentry, Discord session, backend client, and event handlers.
+// It registers application commands and starts the bot event loop.
 package main
 
 import (

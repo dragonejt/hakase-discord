@@ -1,3 +1,4 @@
+// Package events provides the Discord interaction event handler.
 package events
 
 import (
@@ -10,6 +11,7 @@ import (
 	"github.com/dragonejt/hakase-discord/interactions"
 )
 
+// InteractionCreate dispatches Discord interactions to the appropriate handler based on type and command.
 func InteractionCreate(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate, hakaseClient clients.HakaseClient) {
 	switch interactionCreate.Type {
 	case discordgo.InteractionApplicationCommand:
