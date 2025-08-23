@@ -12,10 +12,11 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type GuildCreateTestSuite struct {
+type GuildEventsTestSuite struct {
 	suite.Suite
 	bot          *discordgo.Session
 	guildCreate  *discordgo.GuildCreate
+	guildDelete  *discordgo.GuildDelete
 	hakaseClient *MockHakaseClient
 }
 
@@ -29,20 +30,30 @@ func (hakaseClient *MockHakaseClient) CreateCourse(span *sentry.Span, course cli
 	return nil
 }
 
-func (testSuite *GuildCreateTestSuite) SetupTest() {
+func (hakaseClient *MockHakaseClient) DeleteCourse(span *sentry.Span, courseID string) error {
+	hakaseClient.Called(span, courseID)
+	return nil
+}
+
+func (testSuite *GuildEventsTestSuite) SetupTest() {
 	testSuite.bot = &discordgo.Session{}
 	testSuite.bot.State = &discordgo.State{}
-	testSuite.bot.State.Guilds = []*discordgo.Guild{}
+	guild := &discordgo.Guild{
+		ID:   "1234567890",
+		Name: "Test Guild",
+	}
+	testSuite.bot.State.Guilds = []*discordgo.Guild{guild}
 	testSuite.guildCreate = &discordgo.GuildCreate{
-		Guild: &discordgo.Guild{
-			ID:   "1234567890",
-			Name: "Test Guild",
-		},
+		Guild: guild,
+	}
+	testSuite.guildDelete = &discordgo.GuildDelete{
+		Guild:        guild,
+		BeforeDelete: guild,
 	}
 	testSuite.hakaseClient = new(MockHakaseClient)
 }
 
-func (testSuite *GuildCreateTestSuite) TestGuildCreateSuccess() {
+func (testSuite *GuildEventsTestSuite) TestGuildCreateSuccess() {
 	testSuite.hakaseClient.On("CreateCourse", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
 		slog.Info("CreateCourse called")
 	})
@@ -50,6 +61,14 @@ func (testSuite *GuildCreateTestSuite) TestGuildCreateSuccess() {
 	testSuite.hakaseClient.AssertExpectations(testSuite.T())
 }
 
+func (testSuite *GuildEventsTestSuite) TestGuildDeleteSuccess() {
+	testSuite.hakaseClient.On("DeleteCourse", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		slog.Info("DeleteCourse called")
+	})
+	events.GuildDelete(testSuite.bot, testSuite.guildDelete, testSuite.hakaseClient)
+	testSuite.hakaseClient.AssertExpectations(testSuite.T())
+}
+
 func TestGuildEvents(t *testing.T) {
-	suite.Run(t, new(GuildCreateTestSuite))
+	suite.Run(t, new(GuildEventsTestSuite))
 }
