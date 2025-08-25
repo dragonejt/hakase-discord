@@ -20,6 +20,10 @@ type GuildEventsTestSuite struct {
 	hakaseClient *MockHakaseClient
 }
 
+func TestGuildEvents(t *testing.T) {
+	suite.Run(t, new(GuildEventsTestSuite))
+}
+
 type MockHakaseClient struct {
 	clients.HakaseClient
 	mock.Mock
@@ -67,8 +71,4 @@ func (testSuite *GuildEventsTestSuite) TestGuildDeleteSuccess() {
 	})
 	events.GuildDelete(testSuite.bot, testSuite.guildDelete, testSuite.hakaseClient)
 	testSuite.hakaseClient.AssertExpectations(testSuite.T())
-}
-
-func TestGuildEvents(t *testing.T) {
-	suite.Run(t, new(GuildEventsTestSuite))
 }
