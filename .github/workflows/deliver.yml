@@ -27,13 +27,16 @@ jobs:
       - name: Set Docker Tag
         run: echo "GIT_REV=$(git rev-parse --short HEAD)" > "$GITHUB_ENV"
 
+      - name: Setup Cloud Native Buildpacks
+        uses: buildpacks/github-actions/setup-pack@v5.0.0
+
       - name: Build and Push Docker Image
-        uses: iloveitaly/github-action-nixpacks@main
-        with:
-          push: true
-          tags: |
-            ${{ env.IMAGE_NAME }}:${{ env.GIT_REV }}
-            ${{ env.IMAGE_NAME }}:latest
+        run: |
+            pack build ${{ env.IMAGE_NAME }} \
+              --path . \
+              --builder heroku/builder:24 \
+              --tag ${{ env.IMAGE_NAME }}:${{ env.GIT_REV }} \
+              --publish
 
       - name: Push to Dokku
         uses: dokku/github-action@master
