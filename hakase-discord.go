@@ -4,8 +4,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"log"
+	"io"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -21,7 +22,7 @@ import (
 )
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{AddSource: true})))
 	if !settings.DEBUG {
 		err := sentry.Init(sentry.ClientOptions{
 			Dsn:              "https://1ef54abfefe4da3ed56195664ee3fc03@o4507124907638784.ingest.us.sentry.io/4509828350476288",
@@ -35,7 +36,7 @@ func main() {
 		if err != nil {
 			slog.Warn(fmt.Sprintf("error initiating sentry: %s", err))
 		}
-
+		slog.SetDefault(slog.New(slog.NewJSONHandler(io.MultiWriter(os.Stderr, sentry.NewLogger(context.Background())), &slog.HandlerOptions{AddSource: true})))
 	} else {
 		slog.SetLogLoggerLevel(slog.LevelDebug)
 	}

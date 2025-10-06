@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/bwmarrin/discordgo v0.29.0
-	github.com/getsentry/sentry-go v0.35.0
+	github.com/getsentry/sentry-go v0.35.3
 	github.com/nats-io/nats.go v1.44.0
 	github.com/palantir/stacktrace v0.0.0-20161112013806-78658fd2d177
 	github.com/stretchr/testify v1.10.0
