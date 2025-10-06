@@ -47,6 +47,7 @@ BACKEND_URL="https://hakase.dragonejt.dev" # if self-hosting, change URL to self
 BACKEND_API_KEY="from Backend API"
 NATS_URL="nats://"
 STREAM_NAME="hakase_discord" # different from development stream name
+SENTRY_DSN="from Sentry"
 ```
 Dokku does support dockerized message queues, and hakase uses a dockerized NATS instance in production.
 

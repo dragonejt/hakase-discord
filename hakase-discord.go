@@ -23,9 +23,13 @@ import (
 
 func main() {
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{AddSource: true})))
-	if !settings.DEBUG {
+	if settings.DEBUG {
+		slog.SetLogLoggerLevel(slog.LevelDebug)
+	}
+
+	if settings.SENTRY_DSN != "" {
 		err := sentry.Init(sentry.ClientOptions{
-			Dsn:              "https://1ef54abfefe4da3ed56195664ee3fc03@o4507124907638784.ingest.us.sentry.io/4509828350476288",
+			Dsn:              settings.SENTRY_DSN,
 			EnableTracing:    true,
 			SampleRate:       1,
 			TracesSampleRate: 1,
@@ -37,8 +41,6 @@ func main() {
 			slog.Warn(fmt.Sprintf("error initiating sentry: %s", err))
 		}
 		slog.SetDefault(slog.New(slog.NewJSONHandler(io.MultiWriter(os.Stderr, sentry.NewLogger(context.Background())), &slog.HandlerOptions{AddSource: true})))
-	} else {
-		slog.SetLogLoggerLevel(slog.LevelDebug)
 	}
 
 	bot, err := discordgo.New(fmt.Sprintf("Bot %s", settings.DISCORD_BOT_TOKEN))
