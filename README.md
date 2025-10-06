@@ -30,7 +30,13 @@ STREAM_NAME="hakase_discord_local" # different from production stream name
 ```
 
 ### Testing
-Testing has not been implemented for hakase-discord yet.
+For testing, the following command should be run, with the above environment variables in place:
+```bash
+go test ./...
+```
+This uses Go's built-in test runner which will discover and test all `_test.go` files. The integrate.yml GitHub Actions workflow will run these tests with code coverage (`-coverpkg=./... -coverprofile=coverage.txt`).
+
+If you are using VS Code, the [VS Code Go extension](https://marketplace.visualstudio.com/items?itemName=golang.go) will enable automatic test discovery and running in the Testing sidebar.
 
 ### Linting and Formatting
 Go and the [VS Code Go Extension](https://marketplace.visualstudio.com/items?itemName=golang.Go) automatically performs linting and formatting on save. 
