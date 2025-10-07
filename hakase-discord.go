@@ -22,7 +22,6 @@ import (
 )
 
 func main() {
-	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{AddSource: true})))
 	if settings.DEBUG {
 		slog.SetLogLoggerLevel(slog.LevelDebug)
 	}
