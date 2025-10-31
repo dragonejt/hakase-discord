@@ -3,12 +3,19 @@ package clients
 
 import (
 	"net/http"
+	"sync"
 	"time"
 
+	"github.com/bwmarrin/discordgo"
 	"github.com/getsentry/sentry-go"
 )
 
-type HakaseClient interface {
+type HakaseClient struct {
+	Backend       BackendClient
+	Notifications NotificationsClient
+}
+
+type BackendClient interface {
 	// Course APIs
 	ReadCourse(span *sentry.Span, courseID string) (Course, error)
 	HeadCourse(span *sentry.Span, courseID string) error
@@ -24,11 +31,25 @@ type HakaseClient interface {
 	DeleteAssignment(span *sentry.Span, assignmentID string) error
 }
 
-type BackendClient struct {
-	HakaseClient
-	URL         string
-	API_KEY     string
-	HTTP_CLIENT *http.Client
+type NotificationsClient interface {
+	ListenToStream(bot *discordgo.Session, hakaseClient BackendClient, stopListener chan bool)
+	PublishNotification(span *sentry.Span, notification string)
+	PublishAssignmentNotification(span *sentry.Span, notification AssignmentNotification)
+	PublishStudySessionNotification(span *sentry.Span, notification StudySessionNotification)
+}
+
+type APIClient struct {
+	BackendClient
+	Url        string
+	APIKey     string
+	HttpClient *http.Client
+}
+
+type MQClient struct {
+	NotificationsClient
+	NATSUrl       string
+	StreamName    string
+	PublisherPool sync.Pool
 }
 
 type DiscordSession struct{}

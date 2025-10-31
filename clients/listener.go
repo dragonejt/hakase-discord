@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/dragonejt/hakase-discord/settings"
 	"github.com/getsentry/sentry-go"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
@@ -17,11 +16,11 @@ import (
 )
 
 // ListenToStream starts a JetStream consumer and listens for messages, dispatching them to handlers.
-func ListenToStream(bot *discordgo.Session, hakaseClient HakaseClient, stopListener chan bool) {
-	slog.Info(fmt.Sprintf("opening NATS consumer connection to: %s", settings.NATS_URL))
-	connection, err := nats.Connect(settings.NATS_URL)
+func (mqClient *MQClient) ListenToStream(bot *discordgo.Session, hakaseClient BackendClient, stopListener chan bool) {
+	slog.Info(fmt.Sprintf("opening NATS consumer connection to: %s", mqClient.NATSUrl))
+	connection, err := nats.Connect(mqClient.NATSUrl)
 	if err != nil {
-		slog.Error(stacktrace.Propagate(err, "error connecting to NATS: %s", settings.NATS_URL).Error())
+		slog.Error(stacktrace.Propagate(err, "error connecting to NATS: %s", mqClient.NATSUrl).Error())
 		return
 	}
 	defer func() {
@@ -43,23 +42,23 @@ func ListenToStream(bot *discordgo.Session, hakaseClient HakaseClient, stopListe
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	slog.Debug(fmt.Sprintf("creating stream with name: %s", settings.STREAM_NAME))
+	slog.Debug(fmt.Sprintf("creating stream with name: %s", mqClient.StreamName))
 	_, err = js.CreateOrUpdateStream(ctx, jetstream.StreamConfig{
-		Name:     settings.STREAM_NAME,
-		Subjects: []string{fmt.Sprintf("%s.*", settings.STREAM_NAME)},
+		Name:     mqClient.StreamName,
+		Subjects: []string{fmt.Sprintf("%s.*", mqClient.StreamName)},
 	})
 	if err != nil {
-		slog.Error(stacktrace.Propagate(err, "error creating stream with name: %s", settings.STREAM_NAME).Error())
+		slog.Error(stacktrace.Propagate(err, "error creating stream with name: %s", mqClient.StreamName).Error())
 		return
 	}
 
-	consumer, err := js.CreateOrUpdateConsumer(ctx, settings.STREAM_NAME, jetstream.ConsumerConfig{
-		Name:      settings.STREAM_NAME,
-		Durable:   settings.STREAM_NAME,
+	consumer, err := js.CreateOrUpdateConsumer(ctx, mqClient.StreamName, jetstream.ConsumerConfig{
+		Name:      mqClient.StreamName,
+		Durable:   mqClient.StreamName,
 		AckPolicy: jetstream.AckExplicitPolicy,
 	})
 	if err != nil {
-		slog.Error(stacktrace.Propagate(err, "error creating consumer for stream: %s", settings.STREAM_NAME).Error())
+		slog.Error(stacktrace.Propagate(err, "error creating consumer for stream: %s", mqClient.StreamName).Error())
 		return
 	}
 
@@ -67,7 +66,7 @@ func ListenToStream(bot *discordgo.Session, hakaseClient HakaseClient, stopListe
 		consumeMessage(bot, hakaseClient, message)
 	})
 	if err != nil {
-		slog.Error(stacktrace.Propagate(err, "error subscribing to stream: %s", settings.STREAM_NAME).Error())
+		slog.Error(stacktrace.Propagate(err, "error subscribing to stream: %s", mqClient.StreamName).Error())
 		return
 	}
 	defer subscription.Drain()
@@ -77,7 +76,7 @@ func ListenToStream(bot *discordgo.Session, hakaseClient HakaseClient, stopListe
 }
 
 // consumeMessage dispatches messages based on their subject to the appropriate handler.
-func consumeMessage(bot *discordgo.Session, hakaseClient HakaseClient, message jetstream.Msg) {
+func consumeMessage(bot *discordgo.Session, hakaseClient BackendClient, message jetstream.Msg) {
 	transaction := sentry.StartTransaction(context.WithValue(context.Background(), DiscordSession{}, bot), "consumeMessage")
 	defer transaction.Finish()
 	slog.Info(fmt.Sprintf("received message: %s with subject: %s", string(message.Data()), message.Subject()))
@@ -97,7 +96,7 @@ func consumeMessage(bot *discordgo.Session, hakaseClient HakaseClient, message j
 }
 
 // consumeNotification handles notification messages received from JetStream.
-func consumeNotification(span *sentry.Span, _ HakaseClient, message jetstream.Msg) {
+func consumeNotification(span *sentry.Span, _ BackendClient, message jetstream.Msg) {
 	span = span.StartChild("consumeNotification")
 	defer span.Finish()
 
@@ -105,7 +104,7 @@ func consumeNotification(span *sentry.Span, _ HakaseClient, message jetstream.Ms
 }
 
 // consumeAssignmentNotification handles assignment notification messages received from JetStream.
-func consumeAssignmentNotification(span *sentry.Span, hakaseClient HakaseClient, message jetstream.Msg) {
+func consumeAssignmentNotification(span *sentry.Span, hakaseClient BackendClient, message jetstream.Msg) {
 	span = span.StartChild("consumeAssignmentNotification")
 	defer span.Finish()
 	bot := span.GetTransaction().Context().Value(DiscordSession{}).(*discordgo.Session)

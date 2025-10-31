@@ -33,7 +33,7 @@ func UpdateNotifyChannel(bot *discordgo.Session, interactionCreate *discordgo.In
 	}
 
 	notifyChannel := interactionCreate.MessageComponentData().Values[0]
-	err := hakaseClient.UpdateCourse(transaction, clients.Course{
+	err := hakaseClient.Backend.UpdateCourse(transaction, clients.Course{
 		CourseID:      interactionCreate.GuildID,
 		NotifyChannel: notifyChannel,
 	})
@@ -51,7 +51,7 @@ func UpdateNotifyChannel(bot *discordgo.Session, interactionCreate *discordgo.In
 		}
 	}
 
-	updatedCourse, err := hakaseClient.ReadCourse(transaction, interactionCreate.GuildID)
+	updatedCourse, err := hakaseClient.Backend.ReadCourse(transaction, interactionCreate.GuildID)
 	if err != nil {
 		slog.Error(stacktrace.Propagate(err, "error reading updated course").Error())
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -98,7 +98,7 @@ func UpdateNotifyRole(bot *discordgo.Session, interactionCreate *discordgo.Inter
 	}
 
 	notifyRole := interactionCreate.MessageComponentData().Values[0]
-	err := hakaseClient.UpdateCourse(transaction, clients.Course{
+	err := hakaseClient.Backend.UpdateCourse(transaction, clients.Course{
 		CourseID:    interactionCreate.GuildID,
 		NotifyGroup: notifyRole,
 	})
@@ -116,7 +116,7 @@ func UpdateNotifyRole(bot *discordgo.Session, interactionCreate *discordgo.Inter
 		}
 	}
 
-	updatedCourse, err := hakaseClient.ReadCourse(transaction, interactionCreate.GuildID)
+	updatedCourse, err := hakaseClient.Backend.ReadCourse(transaction, interactionCreate.GuildID)
 	if err != nil {
 		slog.Error(stacktrace.Propagate(err, "error reading updated course").Error())
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{

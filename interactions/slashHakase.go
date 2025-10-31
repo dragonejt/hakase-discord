@@ -79,7 +79,7 @@ func ping(span *sentry.Span, interactionCreate *discordgo.InteractionCreate, hak
 	bot := span.GetTransaction().Context().Value(clients.DiscordSession{}).(*discordgo.Session)
 
 	start := time.Now()
-	err := hakaseClient.HeadCourse(span, interactionCreate.GuildID)
+	err := hakaseClient.Backend.HeadCourse(span, interactionCreate.GuildID)
 	if err != nil {
 		slog.Error(stacktrace.Propagate(err, "error pinging backend").Error())
 	}
@@ -119,7 +119,7 @@ func config(span *sentry.Span, interactionCreate *discordgo.InteractionCreate, h
 	defer span.Finish()
 	bot := span.GetTransaction().Context().Value(clients.DiscordSession{}).(*discordgo.Session)
 
-	course, err := hakaseClient.ReadCourse(span, interactionCreate.GuildID)
+	course, err := hakaseClient.Backend.ReadCourse(span, interactionCreate.GuildID)
 	if err != nil {
 		slog.Error(stacktrace.Propagate(err, "error reading course").Error())
 		err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{

@@ -36,7 +36,7 @@ func UpdateAssignment(bot *discordgo.Session, interactionCreate *discordgo.Inter
 	}
 
 	assignmentID := strings.Split(interactionCreate.MessageComponentData().CustomID, "_")[1]
-	assignment, err := hakaseClient.ReadAssignment(transaction, assignmentID)
+	assignment, err := hakaseClient.Backend.ReadAssignment(transaction, assignmentID)
 	if err != nil {
 		slog.Error(stacktrace.Propagate(err, "error reading assignment").Error())
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -104,7 +104,7 @@ func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo
 		assignment.Link = assignmentData.Components[2].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
 	}
 
-	currentAssignment, err := hakaseClient.ReadAssignment(transaction, assignmentID)
+	currentAssignment, err := hakaseClient.Backend.ReadAssignment(transaction, assignmentID)
 	if assignment.Due.Equal(time.Time{}) {
 		assignment.Due = currentAssignment.Due
 	} else if err == nil && assignment.Due.Before(currentAssignment.Due) {
@@ -118,7 +118,7 @@ func UpdateAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo
 	}
 
 	assignment.ID = currentAssignment.ID
-	updatedAssignment, err := hakaseClient.UpdateAssignment(transaction, assignment)
+	updatedAssignment, err := hakaseClient.Backend.UpdateAssignment(transaction, assignment)
 	if err != nil {
 		slog.Error(stacktrace.Propagate(err, "error updating assignment").Error())
 		_, err := bot.FollowupMessageCreate(interactionCreate.Interaction, false, &discordgo.WebhookParams{
@@ -148,7 +148,7 @@ func DeleteAssignment(bot *discordgo.Session, interactionCreate *discordgo.Inter
 	defer transaction.Finish()
 
 	assignmentID := strings.Split(interactionCreate.MessageComponentData().CustomID, "_")[1]
-	err := hakaseClient.DeleteAssignment(transaction, assignmentID)
+	err := hakaseClient.Backend.DeleteAssignment(transaction, assignmentID)
 	if err != nil {
 		slog.Error(stacktrace.Propagate(err, "unable to delete assignment %s", assignmentID).Error())
 		err := bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{

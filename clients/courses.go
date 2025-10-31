@@ -21,22 +21,22 @@ type Course struct {
 }
 
 // ReadCourse retrieves a course by its ID from the backend.
-func (backend *BackendClient) ReadCourse(span *sentry.Span, courseID string) (Course, error) {
+func (backend *APIClient) ReadCourse(span *sentry.Span, courseID string) (Course, error) {
 	span = span.StartChild("readCourse")
 	defer span.Finish()
 
 	course := Course{}
 
-	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/courses?course_id=%s", backend.URL, courseID), nil)
+	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/courses?course_id=%s", backend.Url, courseID), nil)
 	if err != nil {
 		return course, stacktrace.Propagate(err, "failed to create API request")
 	}
 	request.Header.Add("accept", "application/json")
-	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
+	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.APIKey))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
-	response, err := backend.HTTP_CLIENT.Do(request)
+	response, err := backend.HttpClient.Do(request)
 	if err != nil {
 		return course, stacktrace.Propagate(err, "failed to execute API request")
 	}
@@ -58,20 +58,20 @@ func (backend *BackendClient) ReadCourse(span *sentry.Span, courseID string) (Co
 }
 
 // HeadCourse checks if a course exists in the backend.
-func (backend *BackendClient) HeadCourse(span *sentry.Span, courseID string) error {
+func (backend *APIClient) HeadCourse(span *sentry.Span, courseID string) error {
 	span = span.StartChild("headCourse")
 	defer span.Finish()
 
-	request, err := http.NewRequest(http.MethodHead, fmt.Sprintf("%s/courses?course_id=%s", backend.URL, courseID), nil)
+	request, err := http.NewRequest(http.MethodHead, fmt.Sprintf("%s/courses?course_id=%s", backend.Url, courseID), nil)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to create API request")
 	}
 	request.Header.Add("accept", "application/json")
-	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
+	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.APIKey))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
-	response, err := backend.HTTP_CLIENT.Do(request)
+	response, err := backend.HttpClient.Do(request)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to execute API request")
 	}
@@ -83,7 +83,7 @@ func (backend *BackendClient) HeadCourse(span *sentry.Span, courseID string) err
 }
 
 // CreateCourse creates a new course in the backend.
-func (backend *BackendClient) CreateCourse(span *sentry.Span, course Course) error {
+func (backend *APIClient) CreateCourse(span *sentry.Span, course Course) error {
 	span = span.StartChild("createCourse")
 	defer span.Finish()
 
@@ -92,17 +92,17 @@ func (backend *BackendClient) CreateCourse(span *sentry.Span, course Course) err
 		return stacktrace.Propagate(err, "failed to marshal course")
 	}
 
-	request, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/courses", backend.URL), bytes.NewReader(jsonBody))
+	request, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/courses", backend.Url), bytes.NewReader(jsonBody))
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to create API request")
 	}
 	request.Header.Add("accept", "application/json")
 	request.Header.Add("content-type", "application/json")
-	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
+	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.APIKey))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
-	response, err := backend.HTTP_CLIENT.Do(request)
+	response, err := backend.HttpClient.Do(request)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to execute API request")
 	}
@@ -124,7 +124,7 @@ func (backend *BackendClient) CreateCourse(span *sentry.Span, course Course) err
 }
 
 // UpdateCourse updates an existing course in the backend.
-func (backend *BackendClient) UpdateCourse(span *sentry.Span, course Course) error {
+func (backend *APIClient) UpdateCourse(span *sentry.Span, course Course) error {
 	span = span.StartChild("updateCourse")
 	defer span.Finish()
 
@@ -133,17 +133,17 @@ func (backend *BackendClient) UpdateCourse(span *sentry.Span, course Course) err
 		return stacktrace.Propagate(err, "failed to marshal course")
 	}
 
-	request, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/courses", backend.URL), bytes.NewReader(jsonBody))
+	request, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/courses", backend.Url), bytes.NewReader(jsonBody))
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to create API request")
 	}
 	request.Header.Add("accept", "application/json")
 	request.Header.Add("content-type", "application/json")
-	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
+	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.APIKey))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
-	response, err := backend.HTTP_CLIENT.Do(request)
+	response, err := backend.HttpClient.Do(request)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to execute API request")
 	}
@@ -165,19 +165,19 @@ func (backend *BackendClient) UpdateCourse(span *sentry.Span, course Course) err
 }
 
 // DeleteCourse deletes a course from the backend.
-func (backend *BackendClient) DeleteCourse(span *sentry.Span, courseID string) error {
+func (backend *APIClient) DeleteCourse(span *sentry.Span, courseID string) error {
 	span = span.StartChild("deleteCourse")
 	defer span.Finish()
 
-	request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/courses?course_id=%s", backend.URL, courseID), nil)
+	request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/courses?course_id=%s", backend.Url, courseID), nil)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to create API request")
 	}
-	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
+	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.APIKey))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
-	response, err := backend.HTTP_CLIENT.Do(request)
+	response, err := backend.HttpClient.Do(request)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to execute API request")
 	}

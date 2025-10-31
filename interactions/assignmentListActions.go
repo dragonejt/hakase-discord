@@ -93,7 +93,7 @@ func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.In
 		return
 	}
 
-	createdAssignment, err := hakaseClient.CreateAssignment(transaction, assignment)
+	createdAssignment, err := hakaseClient.Backend.CreateAssignment(transaction, assignment)
 	if err != nil {
 		_, err := bot.FollowupMessageCreate(interactionCreate.Interaction, false, &discordgo.WebhookParams{
 			Content: err.Error(),
@@ -105,13 +105,13 @@ func AddAssignmentSubmit(bot *discordgo.Session, interactionCreate *discordgo.In
 		return
 	}
 
-	go clients.PublishAssignmentNotification(transaction, clients.AssignmentNotification{
+	go hakaseClient.Notifications.PublishAssignmentNotification(transaction, clients.AssignmentNotification{
 		AssignmentID: createdAssignment.ID,
 		CourseID:     interactionCreate.GuildID,
 		Before:       time.Hour,
 	})
 
-	go clients.PublishAssignmentNotification(transaction, clients.AssignmentNotification{
+	go hakaseClient.Notifications.PublishAssignmentNotification(transaction, clients.AssignmentNotification{
 		AssignmentID: createdAssignment.ID,
 		CourseID:     interactionCreate.GuildID,
 		Before:       time.Hour * 24,

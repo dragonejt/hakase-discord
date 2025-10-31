@@ -23,22 +23,22 @@ type Assignment struct {
 }
 
 // ReadAssignment retrieves an assignment by its ID from the backend.
-func (backend *BackendClient) ReadAssignment(span *sentry.Span, assignmentID string) (Assignment, error) {
+func (backend *APIClient) ReadAssignment(span *sentry.Span, assignmentID string) (Assignment, error) {
 	span = span.StartChild("readAssignment")
 	defer span.Finish()
 
 	assignment := Assignment{}
 
-	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/assignments?id=%s", backend.URL, assignmentID), nil)
+	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/assignments?id=%s", backend.Url, assignmentID), nil)
 	if err != nil {
 		return assignment, stacktrace.Propagate(err, "failed to create API request")
 	}
 	request.Header.Add("accept", "application/json")
-	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
+	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.APIKey))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
-	response, err := backend.HTTP_CLIENT.Do(request)
+	response, err := backend.HttpClient.Do(request)
 	if err != nil {
 		return assignment, stacktrace.Propagate(err, "failed to execute API request")
 	}
@@ -60,20 +60,20 @@ func (backend *BackendClient) ReadAssignment(span *sentry.Span, assignmentID str
 }
 
 // HeadAssignment checks if an assignment exists in the backend.
-func (backend *BackendClient) HeadAssignment(span *sentry.Span, assignmentID string) error {
+func (backend *APIClient) HeadAssignment(span *sentry.Span, assignmentID string) error {
 	span = span.StartChild("headAssignment")
 	defer span.Finish()
 
-	request, err := http.NewRequest(http.MethodHead, fmt.Sprintf("%s/assignments?id=%s", backend.URL, assignmentID), nil)
+	request, err := http.NewRequest(http.MethodHead, fmt.Sprintf("%s/assignments?id=%s", backend.Url, assignmentID), nil)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to create API request")
 	}
 	request.Header.Add("accept", "application/json")
-	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
+	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.APIKey))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
-	response, err := backend.HTTP_CLIENT.Do(request)
+	response, err := backend.HttpClient.Do(request)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to execute API request")
 	}
@@ -85,22 +85,22 @@ func (backend *BackendClient) HeadAssignment(span *sentry.Span, assignmentID str
 }
 
 // ListAssignments lists all assignments for a course.
-func (backend *BackendClient) ListAssignments(span *sentry.Span, courseID string) ([]Assignment, error) {
+func (backend *APIClient) ListAssignments(span *sentry.Span, courseID string) ([]Assignment, error) {
 	span = span.StartChild("listAssignments")
 	defer span.Finish()
 
 	assignments := []Assignment{}
 
-	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/assignments?course_id=%s", backend.URL, courseID), nil)
+	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/assignments?course_id=%s", backend.Url, courseID), nil)
 	if err != nil {
 		return assignments, stacktrace.Propagate(err, "failed to create API request")
 	}
 	request.Header.Add("accept", "application/json")
-	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
+	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.APIKey))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
-	response, err := backend.HTTP_CLIENT.Do(request)
+	response, err := backend.HttpClient.Do(request)
 	if err != nil {
 		return assignments, stacktrace.Propagate(err, "failed to execute API request")
 	}
@@ -122,7 +122,7 @@ func (backend *BackendClient) ListAssignments(span *sentry.Span, courseID string
 }
 
 // CreateAssignment creates a new assignment in the backend.
-func (backend *BackendClient) CreateAssignment(span *sentry.Span, assignment Assignment) (Assignment, error) {
+func (backend *APIClient) CreateAssignment(span *sentry.Span, assignment Assignment) (Assignment, error) {
 	span = span.StartChild("createAssignment")
 	defer span.Finish()
 
@@ -131,17 +131,17 @@ func (backend *BackendClient) CreateAssignment(span *sentry.Span, assignment Ass
 		return Assignment{}, stacktrace.Propagate(err, "failed to marshal assignment")
 	}
 
-	request, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/assignments", backend.URL), bytes.NewReader(jsonBody))
+	request, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/assignments", backend.Url), bytes.NewReader(jsonBody))
 	if err != nil {
 		return Assignment{}, stacktrace.Propagate(err, "failed to create API request")
 	}
 	request.Header.Add("accept", "application/json")
 	request.Header.Add("content-type", "application/json")
-	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
+	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.APIKey))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
-	response, err := backend.HTTP_CLIENT.Do(request)
+	response, err := backend.HttpClient.Do(request)
 	if err != nil {
 		return Assignment{}, stacktrace.Propagate(err, "failed to execute API request")
 	}
@@ -163,7 +163,7 @@ func (backend *BackendClient) CreateAssignment(span *sentry.Span, assignment Ass
 }
 
 // UpdateAssignment updates an existing assignment in the backend.
-func (backend *BackendClient) UpdateAssignment(span *sentry.Span, assignment Assignment) (Assignment, error) {
+func (backend *APIClient) UpdateAssignment(span *sentry.Span, assignment Assignment) (Assignment, error) {
 	span = span.StartChild("updateAssignment")
 	defer span.Finish()
 
@@ -172,17 +172,17 @@ func (backend *BackendClient) UpdateAssignment(span *sentry.Span, assignment Ass
 		return Assignment{}, stacktrace.Propagate(err, "failed to marshal assignment")
 	}
 
-	request, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/assignments", backend.URL), bytes.NewReader(jsonBody))
+	request, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/assignments", backend.Url), bytes.NewReader(jsonBody))
 	if err != nil {
 		return Assignment{}, stacktrace.Propagate(err, "failed to create API request")
 	}
 	request.Header.Add("accept", "application/json")
 	request.Header.Add("content-type", "application/json")
-	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
+	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.APIKey))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
-	response, err := backend.HTTP_CLIENT.Do(request)
+	response, err := backend.HttpClient.Do(request)
 	if err != nil {
 		return Assignment{}, stacktrace.Propagate(err, "failed to execute API request")
 	}
@@ -204,19 +204,19 @@ func (backend *BackendClient) UpdateAssignment(span *sentry.Span, assignment Ass
 }
 
 // DeleteAssignment deletes an assignment from the backend.
-func (backend *BackendClient) DeleteAssignment(span *sentry.Span, assignmentID string) error {
+func (backend *APIClient) DeleteAssignment(span *sentry.Span, assignmentID string) error {
 	span = span.StartChild("deleteAssignment")
 	defer span.Finish()
 
-	request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/assignments?id=%s", backend.URL, assignmentID), nil)
+	request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/assignments?id=%s", backend.Url, assignmentID), nil)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to create API request")
 	}
-	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.API_KEY))
+	request.Header.Add("authorization", fmt.Sprintf("Token %s", backend.APIKey))
 	request.Header.Add(sentry.SentryTraceHeader, sentry.CurrentHub().GetTraceparent())
 	request.Header.Add(sentry.SentryBaggageHeader, sentry.CurrentHub().GetBaggage())
 
-	response, err := backend.HTTP_CLIENT.Do(request)
+	response, err := backend.HttpClient.Do(request)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to execute API request")
 	}

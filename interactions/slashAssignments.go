@@ -53,7 +53,7 @@ func getAssignment(span *sentry.Span, interactionCreate *discordgo.InteractionCr
 	span = span.StartChild("/assignments getAssignment")
 	defer span.Finish()
 	bot := span.GetTransaction().Context().Value(clients.DiscordSession{}).(*discordgo.Session)
-	assignment, err := hakaseClient.ReadAssignment(span, assignmentID)
+	assignment, err := hakaseClient.Backend.ReadAssignment(span, assignmentID)
 
 	if err != nil {
 		err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{
@@ -84,7 +84,7 @@ func listAssignments(span *sentry.Span, interactionCreate *discordgo.Interaction
 	span = span.StartChild("/assignments listAssignments")
 	defer span.Finish()
 	bot := span.GetTransaction().Context().Value(clients.DiscordSession{}).(*discordgo.Session)
-	assignments, err := hakaseClient.ListAssignments(span, interactionCreate.GuildID)
+	assignments, err := hakaseClient.Backend.ListAssignments(span, interactionCreate.GuildID)
 
 	if err != nil {
 		err = bot.InteractionRespond(interactionCreate.Interaction, &discordgo.InteractionResponse{

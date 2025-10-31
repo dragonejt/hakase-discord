@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
@@ -49,14 +50,25 @@ func main() {
 	}
 	bot.StateEnabled = true
 
-	backend := &clients.BackendClient{
-		URL:         settings.BACKEND_URL,
-		API_KEY:     settings.BACKEND_API_KEY,
-		HTTP_CLIENT: bot.Client,
+	hakaseClient := clients.HakaseClient{
+		Backend: &clients.APIClient{
+			Url:        settings.BACKEND_URL,
+			APIKey:     settings.BACKEND_API_KEY,
+			HttpClient: bot.Client,
+		},
+		Notifications: &clients.MQClient{
+			NATSUrl:    settings.NATS_URL,
+			StreamName: settings.STREAM_NAME,
+			PublisherPool: sync.Pool{
+				New: func() any {
+					return clients.CreateStreamConnection(settings.NATS_URL)
+				},
+			},
+		},
 	}
 
 	stopListener := make(chan bool, 1)
-	go clients.ListenToStream(bot, backend, stopListener)
+	go hakaseClient.Notifications.ListenToStream(bot, hakaseClient.Backend, stopListener)
 
 	err = bot.Open()
 	if err != nil {
@@ -65,15 +77,17 @@ func main() {
 	}
 
 	slog.Info("registering event handlers")
-	bot.AddHandler(events.Ready)
+	bot.AddHandler(func(bot *discordgo.Session, ready *discordgo.Ready) {
+		events.Ready(bot, ready, hakaseClient)
+	})
 	bot.AddHandler(func(bot *discordgo.Session, guildCreate *discordgo.GuildCreate) {
-		events.GuildCreate(bot, guildCreate, backend)
+		events.GuildCreate(bot, guildCreate, hakaseClient)
 	})
 	bot.AddHandler(func(bot *discordgo.Session, guildDelete *discordgo.GuildDelete) {
-		events.GuildDelete(bot, guildDelete, backend)
+		events.GuildDelete(bot, guildDelete, hakaseClient)
 	})
 	bot.AddHandler(func(bot *discordgo.Session, interactionCreate *discordgo.InteractionCreate) {
-		events.InteractionCreate(bot, interactionCreate, backend)
+		events.InteractionCreate(bot, interactionCreate, hakaseClient)
 	})
 
 	slog.Info("registering interactions")
