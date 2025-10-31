@@ -1,5 +1,8 @@
 # hakase-discord
+[![godoc](https://pkg.go.dev/badge/github.com/dragonejt/hakase-discord.svg)](https://pkg.go.dev/github.com/dragonejt/hakase-discord)
+[![integration](https://github.com/dragonejt/hakase-discord/actions/workflows/integrate.yml/badge.svg)](https://github.com/dragonejt/hakase-discord/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/dragonejt/hakase-discord/graph/badge.svg?token=7MEF3IHI00)](https://codecov.io/gh/dragonejt/hakase-discord)
+[![go report card](https://goreportcard.com/badge/github.com/dragonejt/hakase-discord)](https://goreportcard.com/report/github.com/dragonejt/hakase-discord)
 
 hakase is a collection of helpful utilities for class chatrooms, including an assignment due date reminder, study session scheduler, and more. It is currently under development. This repository holds the Discord Bot, built with Go. The backend API is in a beta state, with a Slack App planned in the future.
 
@@ -60,7 +63,7 @@ Dokku does support dockerized message queues, and hakase uses a dockerized NATS 
 ### Continuous Delivery
 hakase has a continuous delivery GitHub Actions workflow, `deliver.yml`. The steps taken are summarized:
 
-1. Build a Docker image with the [nixpacks GitHub Action](https://github.com/iloveitaly/github-action-nixpacks)
+1. Build a Docker image with the [Heroku Cloud Native Buildpacks](https://github.com/heroku/cnb-builder-images)
 2. The nixpacks GitHub Action uploads the built image to [GitHub Container Registry](https://github.com/dragonejt/hakase-discord/pkgs/container/hakase-discord)
 3. The built docker image is deployed as a docker container via the [Dokku GitHub Action](https://github.com/dokku/github-action)
 4. A new Sentry release is created for monitoring with the [Sentry Release GitHub Action](https://github.com/getsentry/action-release).
