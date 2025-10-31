@@ -14,11 +14,11 @@ import (
 
 type GuildEventsTestSuite struct {
 	suite.Suite
-	bot           *discordgo.Session
-	guildCreate   *discordgo.GuildCreate
-	guildDelete   *discordgo.GuildDelete
-	hakaseClient  *clients.HakaseClient
-	backendClient *MockBackendClient
+	bot          *discordgo.Session
+	guildCreate  *discordgo.GuildCreate
+	guildDelete  *discordgo.GuildDelete
+	hakaseClient clients.HakaseClient
+	backend      *MockBackendClient
 }
 
 func TestGuildEvents(t *testing.T) {
@@ -55,25 +55,25 @@ func (testSuite *GuildEventsTestSuite) SetupTest() {
 		Guild:        guild,
 		BeforeDelete: guild,
 	}
-	testSuite.backendClient = new(MockBackendClient)
-	testSuite.hakaseClient = &clients.HakaseClient{
-		Backend:       testSuite.backendClient,
+	testSuite.backend = new(MockBackendClient)
+	testSuite.hakaseClient = clients.HakaseClient{
+		Backend:       testSuite.backend,
 		Notifications: nil,
 	}
 }
 
 func (testSuite *GuildEventsTestSuite) TestGuildCreateSuccess() {
-	testSuite.backendClient.On("CreateCourse", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+	testSuite.backend.On("CreateCourse", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
 		slog.Info("CreateCourse called")
 	})
-	events.GuildCreate(testSuite.bot, testSuite.guildCreate, *testSuite.hakaseClient)
-	testSuite.backendClient.AssertExpectations(testSuite.T())
+	events.GuildCreate(testSuite.bot, testSuite.guildCreate, testSuite.hakaseClient)
+	testSuite.backend.AssertExpectations(testSuite.T())
 }
 
 func (testSuite *GuildEventsTestSuite) TestGuildDeleteSuccess() {
-	testSuite.backendClient.On("DeleteCourse", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+	testSuite.backend.On("DeleteCourse", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
 		slog.Info("DeleteCourse called")
 	})
-	events.GuildDelete(testSuite.bot, testSuite.guildDelete, *testSuite.hakaseClient)
-	testSuite.backendClient.AssertExpectations(testSuite.T())
+	events.GuildDelete(testSuite.bot, testSuite.guildDelete, testSuite.hakaseClient)
+	testSuite.backend.AssertExpectations(testSuite.T())
 }
