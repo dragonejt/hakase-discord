@@ -172,7 +172,7 @@ func (backend *APIClient) UpdateAssignment(span *sentry.Span, assignment Assignm
 		return Assignment{}, stacktrace.Propagate(err, "failed to marshal assignment")
 	}
 
-	request, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/assignments", backend.Url), bytes.NewReader(jsonBody))
+	request, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/assignments", backend.Url), bytes.NewReader(jsonBody))
 	if err != nil {
 		return Assignment{}, stacktrace.Propagate(err, "failed to create API request")
 	}

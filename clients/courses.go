@@ -133,7 +133,7 @@ func (backend *APIClient) UpdateCourse(span *sentry.Span, course Course) error {
 		return stacktrace.Propagate(err, "failed to marshal course")
 	}
 
-	request, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/courses", backend.Url), bytes.NewReader(jsonBody))
+	request, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/courses", backend.Url), bytes.NewReader(jsonBody))
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to create API request")
 	}
